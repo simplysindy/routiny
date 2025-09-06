@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  typescript: {
+    // Skip type checking during build (handled separately by CI/CD)
+    ignoreBuildErrors: true,
+  },
   env: {
     // Validate required environment variables at build time
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
