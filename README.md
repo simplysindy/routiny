@@ -5,7 +5,7 @@ A task management and personal productivity application built with Next.js, Type
 ## Features
 
 - **Smart Task Breakdown**: AI-powered task decomposition for better productivity
-- **Progress Tracking**: Visual progress indicators and milestone tracking  
+- **Progress Tracking**: Visual progress indicators and milestone tracking
 - **Gamification**: Achievement system and progress visualization
 - **Responsive Design**: Mobile-first design with Tailwind CSS
 - **Real-time Updates**: Live progress tracking and notifications
@@ -30,6 +30,7 @@ A task management and personal productivity application built with Next.js, Type
 ### Environment Setup
 
 1. Copy the environment template:
+
    ```bash
    cp .env.local.example .env.local
    ```
@@ -39,17 +40,20 @@ A task management and personal productivity application built with Next.js, Type
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd routiny
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Start the development server:
+
    ```bash
    npm run dev
    ```

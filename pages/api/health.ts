@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from "next";
 
 type HealthData = {
   status: string;
@@ -8,19 +8,19 @@ type HealthData = {
 
 export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<HealthData>,
+  res: NextApiResponse<HealthData>
 ) {
-  if (req.method !== 'GET') {
+  if (req.method !== "GET") {
     return res.status(405).json({
-      status: 'error',
+      status: "error",
       timestamp: new Date().toISOString(),
-      version: '1.0.0',
+      version: "1.0.0",
     });
   }
 
   res.status(200).json({
-    status: 'ok',
+    status: "ok",
     timestamp: new Date().toISOString(),
-    version: '1.0.0',
+    version: "1.0.0",
   });
 }

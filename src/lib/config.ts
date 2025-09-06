@@ -45,31 +45,31 @@ function getOptionalEnvVar(key: string): string | undefined {
 
 export const config: Config = {
   supabase: {
-    url: getEnvVar('NEXT_PUBLIC_SUPABASE_URL'),
-    anonKey: getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
-    serviceRoleKey: getEnvVar('SUPABASE_SERVICE_ROLE_KEY'),
+    url: getEnvVar("NEXT_PUBLIC_SUPABASE_URL"),
+    anonKey: getEnvVar("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    serviceRoleKey: getEnvVar("SUPABASE_SERVICE_ROLE_KEY"),
   },
   openRouter: {
-    apiKey: getEnvVar('OPENROUTER_API_KEY'),
+    apiKey: getEnvVar("OPENROUTER_API_KEY"),
   },
   upstash: {
-    redisUrl: getEnvVar('UPSTASH_REDIS_REST_URL'),
-    redisToken: getEnvVar('UPSTASH_REDIS_REST_TOKEN'),
+    redisUrl: getEnvVar("UPSTASH_REDIS_REST_URL"),
+    redisToken: getEnvVar("UPSTASH_REDIS_REST_TOKEN"),
   },
   langfuse: {
-    secretKey: getEnvVar('LANGFUSE_SECRET_KEY'),
-    publicKey: getEnvVar('LANGFUSE_PUBLIC_KEY'),
-    host: getEnvVar('LANGFUSE_HOST'),
+    secretKey: getEnvVar("LANGFUSE_SECRET_KEY"),
+    publicKey: getEnvVar("LANGFUSE_PUBLIC_KEY"),
+    host: getEnvVar("LANGFUSE_HOST"),
   },
   app: {
-    url: getEnvVar('NEXT_PUBLIC_APP_URL'),
-    env: getEnvVar('NODE_ENV'),
+    url: getEnvVar("NEXT_PUBLIC_APP_URL"),
+    env: getEnvVar("NODE_ENV"),
   },
   analytics: {
-    vercelAnalyticsId: getOptionalEnvVar('NEXT_PUBLIC_VERCEL_ANALYTICS_ID'),
-    sentryDsn: getOptionalEnvVar('SENTRY_DSN'),
-    sentryOrg: getOptionalEnvVar('SENTRY_ORG'),
-    sentryProject: getOptionalEnvVar('SENTRY_PROJECT'),
+    vercelAnalyticsId: getOptionalEnvVar("NEXT_PUBLIC_VERCEL_ANALYTICS_ID"),
+    sentryDsn: getOptionalEnvVar("SENTRY_DSN"),
+    sentryOrg: getOptionalEnvVar("SENTRY_ORG"),
+    sentryProject: getOptionalEnvVar("SENTRY_PROJECT"),
   },
 };
 
@@ -77,21 +77,28 @@ export const config: Config = {
 export function validateConfig(): boolean {
   try {
     // Test accessing all required config values
-    config.supabase.url;
-    config.supabase.anonKey;
-    config.supabase.serviceRoleKey;
-    config.openRouter.apiKey;
-    config.upstash.redisUrl;
-    config.upstash.redisToken;
-    config.langfuse.secretKey;
-    config.langfuse.publicKey;
-    config.langfuse.host;
-    config.app.url;
-    config.app.env;
-    
-    return true;
+    const requiredValues = [
+      config.supabase.url,
+      config.supabase.anonKey,
+      config.supabase.serviceRoleKey,
+      config.openRouter.apiKey,
+      config.upstash.redisUrl,
+      config.upstash.redisToken,
+      config.langfuse.secretKey,
+      config.langfuse.publicKey,
+      config.langfuse.host,
+      config.app.url,
+      config.app.env,
+    ];
+
+    // Check all values are defined
+    const isValid = requiredValues.every(
+      (value) => value !== undefined && value !== null
+    );
+
+    return isValid;
   } catch (error) {
-    console.error('Configuration validation failed:', error);
+    console.error("Configuration validation failed:", error);
     return false;
   }
 }
