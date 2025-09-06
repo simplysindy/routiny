@@ -7,7 +7,7 @@
 | Runtime                 | Node.js                   | 22.18.0 | JavaScript runtime                | Latest LTS with modern features and performance         |
 | Frontend Language       | TypeScript                | 5.0+    | Type-safe frontend development    | Learning industry standard with error prevention        |
 | Frontend Framework      | Next.js                   | 15.5.2  | React-based fullstack framework   | App Router, server components, built-in optimization    |
-| UI Library              | React                     | 19.1.1  | Component-based UI library        | Latest with concurrent features                          |
+| UI Library              | React                     | 19.1.1  | Component-based UI library        | Latest with concurrent features                         |
 | UI Component Library    | Headless UI + Custom      | 2.0+    | Accessible base components        | Lightweight, educational, customizable                  |
 | State Management        | Zustand                   | 4.0+    | Client-side state management      | Simple API, perfect for learning                        |
 | Backend Language        | TypeScript                | 5.0+    | Server-side logic in API routes   | Shared types with frontend                              |
