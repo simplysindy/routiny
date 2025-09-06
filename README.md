@@ -1,6 +1,6 @@
 # Routiny
 
-A task management and personal productivity application built with Next.js, TypeScript, and AI-powered coaching features.
+A personal productivity application with AI-powered coaching features, built with Next.js, TypeScript.
 
 ## Features
 
