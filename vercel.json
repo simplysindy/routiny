@@ -6,11 +6,8 @@
   "devCommand": "npm run dev",
   "regions": ["iad1"],
   "functions": {
-    "src/app/**/*.tsx": {
-      "runtime": "nodejs20.x"
-    },
     "pages/api/**/*.ts": {
-      "runtime": "nodejs20.x"
+      "runtime": "nodejs22.x"
     }
   },
   "headers": [
