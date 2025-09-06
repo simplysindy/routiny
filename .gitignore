@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# project setup
+# development tools and local configs
 .bmad-core
 .claude
 .ignore
