@@ -13,29 +13,15 @@ A personal productivity application with AI-powered coaching features, built wit
 ## Tech Stack
 
 - **Framework**: Next.js 15.5.2 with App Router and TypeScript
-- **Styling**: Tailwind CSS v4 with mobile-first responsive design
-- **State Management**: Zustand for client-side state
-- **Database**: Supabase PostgreSQL with real-time features
-- **Authentication**: Supabase Auth with magic link authentication
-- **AI Integration**: OpenRouter for task breakdown and coaching
-- **Deployment**: Vercel with automatic Git integration
+- **Styling**: Tailwind CSS v4.1.13 with mobile-first responsive design
+- **Development**: ESLint 9.35.0 and Prettier 3.6.2 for code quality
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18.0 or higher
-- npm 9.0 or higher
-
-### Environment Setup
-
-1. Copy the environment template:
-
-   ```bash
-   cp .env.local.example .env.local
-   ```
-
-2. Fill in your environment variables in `.env.local`
+- Node.js 22.x or higher
+- npm or yarn package manager
 
 ### Installation
 
@@ -99,7 +85,7 @@ routiny/
 
 1. Follow the established coding standards
 2. Run `npm run lint` and `npm run format` before committing
-3. Ensure all tests pass with `npm run test`
+3. Run type checking with `npm run type-check`
 4. Update documentation as needed
 
 ## License
