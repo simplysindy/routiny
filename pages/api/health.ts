@@ -33,7 +33,7 @@ export default async function handler(
   }
 
   // Test Supabase connection
-  let supabaseStatus = {
+  let supabaseStatus: HealthData["services"]["supabase"] = {
     status: "error",
     connected: false,
     error: "unknown",
