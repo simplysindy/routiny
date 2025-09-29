@@ -5,19 +5,19 @@ interface Config {
   supabase: {
     url: string;
     anonKey: string;
-    serviceRoleKey: string;
+    serviceRoleKey?: string;
   };
   openRouter: {
-    apiKey: string;
+    apiKey?: string;
   };
   upstash: {
-    redisUrl: string;
-    redisToken: string;
+    redisUrl?: string;
+    redisToken?: string;
   };
   langfuse: {
-    secretKey: string;
-    publicKey: string;
-    host: string;
+    secretKey?: string;
+    publicKey?: string;
+    host?: string;
   };
   app: {
     url: string;
@@ -47,19 +47,19 @@ export const config: Config = {
   supabase: {
     url: getEnvVar("NEXT_PUBLIC_SUPABASE_URL"),
     anonKey: getEnvVar("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-    serviceRoleKey: getEnvVar("SUPABASE_SERVICE_ROLE_KEY"),
+    serviceRoleKey: getOptionalEnvVar("SUPABASE_SERVICE_ROLE_KEY"),
   },
   openRouter: {
-    apiKey: getEnvVar("OPENROUTER_API_KEY"),
+    apiKey: getOptionalEnvVar("OPENROUTER_API_KEY"),
   },
   upstash: {
-    redisUrl: getEnvVar("UPSTASH_REDIS_REST_URL"),
-    redisToken: getEnvVar("UPSTASH_REDIS_REST_TOKEN"),
+    redisUrl: getOptionalEnvVar("UPSTASH_REDIS_REST_URL"),
+    redisToken: getOptionalEnvVar("UPSTASH_REDIS_REST_TOKEN"),
   },
   langfuse: {
-    secretKey: getEnvVar("LANGFUSE_SECRET_KEY"),
-    publicKey: getEnvVar("LANGFUSE_PUBLIC_KEY"),
-    host: getEnvVar("LANGFUSE_HOST"),
+    secretKey: getOptionalEnvVar("LANGFUSE_SECRET_KEY"),
+    publicKey: getOptionalEnvVar("LANGFUSE_PUBLIC_KEY"),
+    host: getOptionalEnvVar("LANGFUSE_HOST"),
   },
   app: {
     url: getEnvVar("NEXT_PUBLIC_APP_URL"),
@@ -76,17 +76,10 @@ export const config: Config = {
 // Validation helper to check if all required environment variables are set
 export function validateConfig(): boolean {
   try {
-    // Test accessing all required config values
+    // Test accessing only essential config values for basic app functionality
     const requiredValues = [
       config.supabase.url,
       config.supabase.anonKey,
-      config.supabase.serviceRoleKey,
-      config.openRouter.apiKey,
-      config.upstash.redisUrl,
-      config.upstash.redisToken,
-      config.langfuse.secretKey,
-      config.langfuse.publicKey,
-      config.langfuse.host,
       config.app.url,
       config.app.env,
     ];
