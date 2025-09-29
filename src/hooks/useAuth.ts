@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { useAuthStore } from '../stores/authStore'
+import { useEffect } from "react";
+import { useAuthStore } from "../stores/authStore";
 
 export function useAuth() {
   const {
@@ -10,15 +10,15 @@ export function useAuth() {
     signIn,
     signOut,
     initialize,
-  } = useAuthStore()
+  } = useAuthStore();
 
-  const isAuthenticated = !!user && !!session
+  const isAuthenticated = !!user && !!session;
 
   useEffect(() => {
     if (!isInitialized) {
-      initialize()
+      initialize();
     }
-  }, [isInitialized, initialize])
+  }, [isInitialized, initialize]);
 
   return {
     user,
@@ -29,5 +29,5 @@ export function useAuth() {
     signIn,
     signOut,
     initialize,
-  }
+  };
 }

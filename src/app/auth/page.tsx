@@ -1,48 +1,48 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useAuth } from '../../hooks/useAuth'
+import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function AuthPage() {
-  const [email, setEmail] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
-  const { signIn } = useAuth()
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!email) {
-      setError('Email is required')
-      return
+      setError("Email is required");
+      return;
     }
 
     // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address')
-      return
+      setError("Please enter a valid email address");
+      return;
     }
 
-    setIsSubmitting(true)
-    setError('')
-    setMessage('')
+    setIsSubmitting(true);
+    setError("");
+    setMessage("");
 
-    const { error } = await signIn(email)
+    const { error } = await signIn(email);
 
     if (error) {
-      setError(error.message || 'Failed to send magic link. Please try again.')
+      setError(error.message || "Failed to send magic link. Please try again.");
     } else {
-      setMessage('Check your email for a magic link to sign in!')
+      setMessage("Check your email for a magic link to sign in!");
     }
 
-    setIsSubmitting(false)
-  }
+    setIsSubmitting(false);
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to Routiny
@@ -51,7 +51,7 @@ export default function AuthPage() {
             Enter your email to get a magic link
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="email" className="sr-only">
@@ -63,7 +63,7 @@ export default function AuthPage() {
               type="email"
               autoComplete="email"
               required
-              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none sm:text-sm"
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -87,9 +87,9 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isSubmitting ? 'Sending magic link...' : 'Send magic link'}
+              {isSubmitting ? "Sending magic link..." : "Send magic link"}
             </button>
           </div>
         </form>
@@ -101,5 +101,5 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

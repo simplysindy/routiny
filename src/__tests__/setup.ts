@@ -1,5 +1,5 @@
-import { vi } from 'vitest'
-import '@testing-library/jest-dom'
+import { vi } from "vitest";
+import "@testing-library/jest-dom";
 
 // Mock Supabase
 export const mockSupabaseClient = {
@@ -19,28 +19,28 @@ export const mockSupabaseClient = {
     delete: vi.fn().mockReturnThis(),
   })),
   rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
-}
+};
 
 // Mock the Supabase client
-vi.mock('../lib/clients', () => ({
+vi.mock("../lib/clients", () => ({
   supabase: mockSupabaseClient,
   createServerSupabaseClient: vi.fn(() => mockSupabaseClient),
-}))
+}));
 
 // Mock Next.js router
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
     back: vi.fn(),
   }),
-}))
+}));
 
 // Mock window.location
-Object.defineProperty(window, 'location', {
+Object.defineProperty(window, "location", {
   value: {
-    origin: 'http://localhost:3000',
-    href: 'http://localhost:3000',
+    origin: "http://localhost:3000",
+    href: "http://localhost:3000",
   },
   writable: true,
-})
+});
