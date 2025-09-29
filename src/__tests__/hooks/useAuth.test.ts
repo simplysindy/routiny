@@ -1,25 +1,72 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
+import type { Session, User as SupabaseAuthUser } from '@supabase/supabase-js'
+import type { User } from '../../types'
 import { useAuth } from '../../hooks/useAuth'
 import { useAuthStore } from '../../stores/authStore'
-import { mockSupabaseClient } from '../setup'
 
 // Mock the auth store
 vi.mock('../../stores/authStore')
 
+type AuthStoreState = ReturnType<typeof useAuthStore.getState>
+
+const timestamp = '2024-01-01T00:00:00.000Z'
+
+const createMockUser = (): User => ({
+  id: '1',
+  email: 'test@test.com',
+  streak_count: 0,
+  total_tasks_completed: 0,
+  preferences: {
+    coach_personality: 'neutral',
+    notification_enabled: true,
+    theme: 'light',
+  },
+  created_at: timestamp,
+  last_active: timestamp,
+})
+
+const createMockSupabaseUser = (): SupabaseAuthUser => ({
+  id: 'supabase-user-1',
+  app_metadata: {},
+  user_metadata: {},
+  aud: 'authenticated',
+  created_at: timestamp,
+})
+
+const createMockSession = (user: SupabaseAuthUser): Session => ({
+  access_token: 'access-token',
+  refresh_token: 'refresh-token',
+  expires_in: 3600,
+  token_type: 'bearer',
+  provider_token: null,
+  provider_refresh_token: null,
+  expires_at: Math.floor(Date.now() / 1000) + 3600,
+  user,
+})
+
+const createMockAuthStore = (
+  overrides: Partial<AuthStoreState> = {},
+): AuthStoreState => ({
+  user: null,
+  session: null,
+  isLoading: false,
+  isInitialized: false,
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+  initialize: vi.fn(),
+  setUser: vi.fn(),
+  setSession: vi.fn(),
+  setLoading: vi.fn(),
+  ...overrides,
+})
+
 describe('useAuth', () => {
-  const mockAuthStore = {
-    user: null,
-    session: null,
-    isLoading: false,
-    isInitialized: false,
-    signIn: vi.fn(),
-    signOut: vi.fn(),
-    initialize: vi.fn(),
-  }
+  let mockAuthStore: AuthStoreState
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAuthStore = createMockAuthStore()
     vi.mocked(useAuthStore).mockReturnValue(mockAuthStore)
   })
 
@@ -41,14 +88,16 @@ describe('useAuth', () => {
   })
 
   it('should return isAuthenticated as true when user and session exist', () => {
-    const mockUser = { id: '1', email: 'test@test.com' } as any
-    const mockSession = { user: mockUser } as any
+    const domainUser = createMockUser()
+    const supabaseUser = createMockSupabaseUser()
+    const mockSession = createMockSession(supabaseUser)
 
-    vi.mocked(useAuthStore).mockReturnValue({
-      ...mockAuthStore,
-      user: mockUser,
-      session: mockSession,
-    })
+    vi.mocked(useAuthStore).mockReturnValue(
+      createMockAuthStore({
+        user: domainUser,
+        session: mockSession,
+      }),
+    )
 
     const { result } = renderHook(() => useAuth())
     expect(result.current.isAuthenticated).toBe(true)
