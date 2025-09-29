@@ -1,6 +1,43 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { Session, User as SupabaseAuthUser } from '@supabase/supabase-js'
 import { useAuthStore } from '../../stores/authStore'
 import { mockSupabaseClient } from '../setup'
+import type { User } from '../../types'
+
+const timestamp = '2024-01-01T00:00:00.000Z'
+
+const createDomainUser = (): User => ({
+  id: '1',
+  email: 'test@test.com',
+  streak_count: 0,
+  total_tasks_completed: 0,
+  preferences: {
+    coach_personality: 'neutral',
+    notification_enabled: true,
+    theme: 'light',
+  },
+  created_at: timestamp,
+  last_active: timestamp,
+})
+
+const createSupabaseUser = (): SupabaseAuthUser => ({
+  id: 'supabase-user-1',
+  app_metadata: {},
+  user_metadata: {},
+  aud: 'authenticated',
+  created_at: timestamp,
+})
+
+const createSession = (user: SupabaseAuthUser): Session => ({
+  access_token: 'access-token',
+  refresh_token: 'refresh-token',
+  expires_in: 3600,
+  token_type: 'bearer',
+  provider_token: null,
+  provider_refresh_token: null,
+  expires_at: Math.floor(Date.now() / 1000) + 3600,
+  user,
+})
 
 describe('authStore', () => {
   beforeEach(() => {
@@ -49,10 +86,6 @@ describe('authStore', () => {
     // Mock successful sign out
     mockSupabaseClient.auth.signOut.mockResolvedValue({ error: null })
 
-    // Mock window.location
-    delete (window as any).location
-    window.location = { href: '' } as any
-
     const { signOut } = useAuthStore.getState()
     await signOut()
 
@@ -61,9 +94,9 @@ describe('authStore', () => {
   })
 
   it('should set user', () => {
-    const mockUser = { id: '1', email: 'test@test.com' } as any
+    const mockUser = createDomainUser()
     const { setUser } = useAuthStore.getState()
-    
+
     setUser(mockUser)
     
     const state = useAuthStore.getState()
@@ -71,9 +104,9 @@ describe('authStore', () => {
   })
 
   it('should set session', () => {
-    const mockSession = { user: { id: '1' } } as any
+    const mockSession = createSession(createSupabaseUser())
     const { setSession } = useAuthStore.getState()
-    
+
     setSession(mockSession)
     
     const state = useAuthStore.getState()
