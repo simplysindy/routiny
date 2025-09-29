@@ -20,10 +20,12 @@ const resetQueryBuilder = () => {
   mockQueryBuilder.eq.mockImplementation(() => mockQueryBuilder);
 
   mockQueryBuilder.single.mockReset();
-  mockQueryBuilder.single.mockImplementation(async (): Promise<QueryResult> => ({
-    data: null,
-    error: null,
-  }));
+  mockQueryBuilder.single.mockImplementation(
+    async (): Promise<QueryResult> => ({
+      data: null,
+      error: null,
+    })
+  );
 
   mockQueryBuilder.insert.mockReset();
   mockQueryBuilder.insert.mockImplementation(() => mockQueryBuilder);
@@ -57,10 +59,12 @@ const resetSupabaseClient = () => {
   mockSupabaseClient.from.mockImplementation(() => mockQueryBuilder);
 
   mockSupabaseClient.rpc.mockReset();
-  mockSupabaseClient.rpc.mockImplementation(async (): Promise<QueryResult> => ({
-    data: null,
-    error: null,
-  }));
+  mockSupabaseClient.rpc.mockImplementation(
+    async (): Promise<QueryResult> => ({
+      data: null,
+      error: null,
+    })
+  );
 
   Object.values(mockSupabaseClient.auth).forEach((fn) => fn.mockReset?.());
 };
