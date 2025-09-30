@@ -41,7 +41,7 @@ export default async function handler(
 
   try {
     // Simple query to test connection
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("users")
       .select("count", { count: "exact" })
       .limit(0);
