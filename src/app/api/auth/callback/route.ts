@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { config } from "../../../../lib/config";
 import type { Database } from "../../../../types/database";
 
+export const runtime = "nodejs";
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
