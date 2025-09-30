@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Session } from "@supabase/supabase-js";
-import { supabase } from "../lib/clients";
+import { userRepository } from "../services/userService";
 import type { User } from "../types";
 
 interface AuthState {
@@ -33,12 +33,7 @@ export const useAuthStore = create<AuthStore>()(
       signIn: async (email: string) => {
         set({ isLoading: true });
 
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
+        const { error } = await userRepository.signIn(email);
 
         set({ isLoading: false });
         return { error };
@@ -47,7 +42,7 @@ export const useAuthStore = create<AuthStore>()(
       signOut: async () => {
         set({ isLoading: true });
 
-        const { error } = await supabase.auth.signOut();
+        const { error } = await userRepository.signOut();
 
         if (!error) {
           set({
@@ -73,7 +68,7 @@ export const useAuthStore = create<AuthStore>()(
         const {
           data: { session },
           error,
-        } = await supabase.auth.getSession();
+        } = await userRepository.getSession();
 
         if (error) {
           console.error("Error getting session:", error);
@@ -83,11 +78,8 @@ export const useAuthStore = create<AuthStore>()(
 
         if (session?.user) {
           // Fetch user profile from our users table
-          const { data: userProfile, error: profileError } = await supabase
-            .from("users")
-            .select("*")
-            .eq("id", session.user.id)
-            .single();
+          const { data: userProfile, error: profileError } =
+            await userRepository.findById(session.user.id);
 
           if (!profileError && userProfile) {
             set({
@@ -115,14 +107,12 @@ export const useAuthStore = create<AuthStore>()(
         }
 
         // Listen for auth changes
-        supabase.auth.onAuthStateChange(async (event, session) => {
+        userRepository.onAuthStateChange(async (event, session) => {
           if (event === "SIGNED_IN" && session?.user) {
             // Fetch user profile
-            const { data: userProfile } = await supabase
-              .from("users")
-              .select("*")
-              .eq("id", session.user.id)
-              .single();
+            const { data: userProfile } = await userRepository.findById(
+              session.user.id
+            );
 
             set({
               user: userProfile || null,

@@ -3,6 +3,32 @@ import type { User, UserPreferences } from "../types";
 import type { PostgrestError } from "@supabase/supabase-js";
 
 export class UserService {
+  // Auth methods
+  static async signInWithEmail(email: string, redirectTo?: string) {
+    return await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo:
+          redirectTo || `${window.location.origin}/auth/callback`,
+      },
+    });
+  }
+
+  static async signOut() {
+    return await supabase.auth.signOut();
+  }
+
+  static async getSession() {
+    return await supabase.auth.getSession();
+  }
+
+  static onAuthStateChange(
+    callback: Parameters<typeof supabase.auth.onAuthStateChange>[0]
+  ) {
+    return supabase.auth.onAuthStateChange(callback);
+  }
+
+  // User profile methods
   static async getUserProfile(
     userId: string
   ): Promise<{ data: User | null; error: PostgrestError | null }> {
@@ -92,6 +118,15 @@ export class UserService {
 
 // Repository functions for direct use
 export const userRepository = {
+  // Auth
+  signIn: (email: string, redirectTo?: string) =>
+    UserService.signInWithEmail(email, redirectTo),
+  signOut: () => UserService.signOut(),
+  getSession: () => UserService.getSession(),
+  onAuthStateChange: (
+    callback: Parameters<typeof supabase.auth.onAuthStateChange>[0]
+  ) => UserService.onAuthStateChange(callback),
+  // User profile
   findById: (userId: string) => UserService.getUserProfile(userId),
   update: (userId: string, updates: Partial<Omit<User, "id" | "created_at">>) =>
     UserService.updateUserProfile(userId, updates),

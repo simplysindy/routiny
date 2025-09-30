@@ -1,8 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Session, User as SupabaseAuthUser } from "@supabase/supabase-js";
+import type {
+  Session,
+  User as SupabaseAuthUser,
+  AuthError,
+} from "@supabase/supabase-js";
 import { useAuthStore } from "../../stores/authStore";
-import { mockSupabaseClient } from "../setup";
 import type { User } from "../../types";
+
+// Mock userRepository
+vi.mock("../../services/userService", () => ({
+  userRepository: {
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+    getSession: vi.fn(),
+    onAuthStateChange: vi.fn(),
+    findById: vi.fn(),
+  },
+}));
 
 const timestamp = "2024-01-01T00:00:00.000Z";
 
@@ -39,6 +53,10 @@ const createSession = (user: SupabaseAuthUser): Session => ({
   user,
 });
 
+// Get the mocked userRepository
+import { userRepository } from "../../services/userService";
+const mockUserRepository = vi.mocked(userRepository);
+
 describe("authStore", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -57,24 +75,25 @@ describe("authStore", () => {
 
   it("should handle sign in", async () => {
     const email = "test@example.com";
-    mockSupabaseClient.auth.signInWithOtp.mockResolvedValue({ error: null });
+    mockUserRepository.signIn.mockResolvedValue({
+      data: { user: null, session: null },
+      error: null,
+    });
 
     const { signIn } = useAuthStore.getState();
     const result = await signIn(email);
 
-    expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    expect(mockUserRepository.signIn).toHaveBeenCalledWith(email);
     expect(result.error).toBe(null);
   });
 
   it("should handle sign in error", async () => {
     const email = "test@example.com";
-    const error = new Error("Sign in failed");
-    mockSupabaseClient.auth.signInWithOtp.mockResolvedValue({ error });
+    const error = new Error("Sign in failed") as AuthError;
+    mockUserRepository.signIn.mockResolvedValue({
+      data: { user: null, session: null },
+      error,
+    });
 
     const { signIn } = useAuthStore.getState();
     const result = await signIn(email);
@@ -84,12 +103,12 @@ describe("authStore", () => {
 
   it("should handle sign out", async () => {
     // Mock successful sign out
-    mockSupabaseClient.auth.signOut.mockResolvedValue({ error: null });
+    mockUserRepository.signOut.mockResolvedValue({ error: null });
 
     const { signOut } = useAuthStore.getState();
     await signOut();
 
-    expect(mockSupabaseClient.auth.signOut).toHaveBeenCalled();
+    expect(mockUserRepository.signOut).toHaveBeenCalled();
     expect(window.location.href).toBe("/auth");
   });
 
