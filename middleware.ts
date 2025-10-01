@@ -7,6 +7,11 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const pathname = request.nextUrl.pathname;
 
+  // Skip middleware for auth callback to avoid interfering with auth flow
+  if (pathname === "/auth/callback") {
+    return response;
+  }
+
   // Create a Supabase client configured to use cookies
   const supabase = createServerClient<Database>(
     appConfig.supabase.url,
@@ -25,10 +30,16 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Get the session
+  // Get the user (more secure than getSession for server-side)
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  console.log(`[Middleware] ${pathname}:`, {
+    hasUser: !!user,
+    userId: user?.id,
+    email: user?.email,
+  });
 
   // Protected routes that require authentication
   const protectedRoutes = ["/dashboard", "/tasks", "/profile"];
@@ -41,16 +52,22 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
   // Redirect unauthenticated users away from protected routes
-  if (isProtectedRoute && !session) {
+  if (isProtectedRoute && !user) {
+    console.log(
+      `[Middleware] Redirecting to /auth (no user for protected route)`
+    );
     const redirectUrl = new URL("/auth", request.url);
     redirectUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
   // Redirect authenticated users away from auth routes
-  if (isAuthRoute && session) {
+  if (isAuthRoute && user && pathname !== "/auth/callback") {
+    console.log(
+      `[Middleware] Redirecting authenticated user from ${pathname} to task creation`
+    );
     const redirectTo = request.nextUrl.searchParams.get("redirectTo");
-    const redirectUrl = new URL(redirectTo || "/dashboard", request.url);
+    const redirectUrl = new URL(redirectTo || "/tasks/create", request.url);
     return NextResponse.redirect(redirectUrl);
   }
 

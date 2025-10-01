@@ -98,6 +98,8 @@ export const useAuthStore = create<AuthStore>()(
             });
           }
         } else {
+          // Clear persisted data if no session
+          localStorage.removeItem("auth-storage");
           set({
             user: null,
             session: null,

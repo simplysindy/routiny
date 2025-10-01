@@ -52,7 +52,11 @@ export default function AuthPage() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit}
+          suppressHydrationWarning
+        >
           <div>
             <label htmlFor="email" className="sr-only">
               Email address

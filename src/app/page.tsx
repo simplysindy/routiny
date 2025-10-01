@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
-  const isInitialized = useAuthStore((state) => state.isInitialized);
+  const { user, isInitialized } = useAuth();
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
-    if (isInitialized) {
+    // Only redirect once auth is fully initialized
+    if (isInitialized && !hasRedirected) {
+      setHasRedirected(true);
       if (user) {
         // Redirect authenticated users to task creation
         router.push("/tasks/create");
@@ -19,7 +21,7 @@ export default function Home() {
         router.push("/auth");
       }
     }
-  }, [user, isInitialized, router]);
+  }, [user, isInitialized, router, hasRedirected]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
