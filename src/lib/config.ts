@@ -31,45 +31,64 @@ interface Config {
   };
 }
 
-function getEnvVar(key: string): string {
-  const value = process.env[key];
+// Direct environment variable access for Next.js build-time replacement
+// Next.js only inlines NEXT_PUBLIC_ vars when accessed directly as process.env.VARIABLE_NAME
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+const NEXT_PUBLIC_VERCEL_ANALYTICS_ID =
+  process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_ID;
+
+// Server-only variables (safe to use dynamic access)
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const LANGFUSE_SECRET_KEY = process.env.LANGFUSE_SECRET_KEY;
+const LANGFUSE_PUBLIC_KEY = process.env.LANGFUSE_PUBLIC_KEY;
+const LANGFUSE_HOST = process.env.LANGFUSE_HOST;
+const NODE_ENV = process.env.NODE_ENV;
+const SENTRY_DSN = process.env.SENTRY_DSN;
+const SENTRY_ORG = process.env.SENTRY_ORG;
+const SENTRY_PROJECT = process.env.SENTRY_PROJECT;
+
+function requireEnv(value: string | undefined, name: string): string {
   if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
+    throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;
 }
 
-function getOptionalEnvVar(key: string): string | undefined {
-  return process.env[key];
-}
-
 export const config: Config = {
   supabase: {
-    url: getEnvVar("NEXT_PUBLIC_SUPABASE_URL"),
-    anonKey: getEnvVar("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-    serviceRoleKey: getOptionalEnvVar("SUPABASE_SERVICE_ROLE_KEY"),
+    url: requireEnv(NEXT_PUBLIC_SUPABASE_URL, "NEXT_PUBLIC_SUPABASE_URL"),
+    anonKey: requireEnv(
+      NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+    ),
+    serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY,
   },
   openRouter: {
-    apiKey: getOptionalEnvVar("OPENROUTER_API_KEY"),
+    apiKey: OPENROUTER_API_KEY,
   },
   upstash: {
-    redisUrl: getOptionalEnvVar("UPSTASH_REDIS_REST_URL"),
-    redisToken: getOptionalEnvVar("UPSTASH_REDIS_REST_TOKEN"),
+    redisUrl: UPSTASH_REDIS_REST_URL,
+    redisToken: UPSTASH_REDIS_REST_TOKEN,
   },
   langfuse: {
-    secretKey: getOptionalEnvVar("LANGFUSE_SECRET_KEY"),
-    publicKey: getOptionalEnvVar("LANGFUSE_PUBLIC_KEY"),
-    host: getOptionalEnvVar("LANGFUSE_HOST"),
+    secretKey: LANGFUSE_SECRET_KEY,
+    publicKey: LANGFUSE_PUBLIC_KEY,
+    host: LANGFUSE_HOST,
   },
   app: {
-    url: getEnvVar("NEXT_PUBLIC_APP_URL"),
-    env: getEnvVar("NODE_ENV"),
+    url: requireEnv(NEXT_PUBLIC_APP_URL, "NEXT_PUBLIC_APP_URL"),
+    env: requireEnv(NODE_ENV, "NODE_ENV"),
   },
   analytics: {
-    vercelAnalyticsId: getOptionalEnvVar("NEXT_PUBLIC_VERCEL_ANALYTICS_ID"),
-    sentryDsn: getOptionalEnvVar("SENTRY_DSN"),
-    sentryOrg: getOptionalEnvVar("SENTRY_ORG"),
-    sentryProject: getOptionalEnvVar("SENTRY_PROJECT"),
+    vercelAnalyticsId: NEXT_PUBLIC_VERCEL_ANALYTICS_ID,
+    sentryDsn: SENTRY_DSN,
+    sentryOrg: SENTRY_ORG,
+    sentryProject: SENTRY_PROJECT,
   },
 };
 

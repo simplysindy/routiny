@@ -20,12 +20,6 @@ const nextConfig: NextConfig = {
     // Only ignore in production builds where types are pre-validated
     ignoreBuildErrors: process.env.NODE_ENV === "production",
   },
-  env: {
-    // Validate required environment variables at build time
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-  },
   // Security headers
   async headers() {
     return [
