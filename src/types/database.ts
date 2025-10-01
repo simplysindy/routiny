@@ -41,6 +41,7 @@ export type Database = {
           created_at?: string;
           last_active?: string;
         };
+        Relationships: [];
       };
       tasks: {
         Row: {
@@ -70,6 +71,7 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       task_steps: {
         Row: {
@@ -99,7 +101,12 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };

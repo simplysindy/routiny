@@ -1,6 +1,7 @@
 import { supabase } from "../lib/clients";
 import type { Task } from "../types";
 import type { PostgrestError } from "@supabase/supabase-js";
+import type { Database } from "../types/database";
 
 export class TaskService {
   /**
@@ -12,14 +13,20 @@ export class TaskService {
     userId: string
   ): Promise<{ data: Task | null; error: PostgrestError | Error | null }> {
     try {
-      const { data, error } = await supabase
-        .from("tasks")
-        .insert({
+      const insertPayload: Array<
+        Database["public"]["Tables"]["tasks"]["Insert"]
+      > = [
+        {
           user_id: userId,
           title,
-          ai_breakdown: [], // Will be populated by AI in Story 1.4
+          ai_breakdown: [] as string[], // Will be populated by AI in Story 1.4
           status: "pending",
-        })
+        },
+      ];
+
+      const { data, error } = await supabase
+        .from("tasks")
+        .insert(insertPayload)
         .select()
         .single();
 
@@ -73,7 +80,9 @@ export class TaskService {
     taskId: string,
     status: Task["status"]
   ): Promise<{ data: Task | null; error: PostgrestError | null }> {
-    const updateData: { status: Task["status"]; completed_at?: string } = { status };
+    const updateData: Database["public"]["Tables"]["tasks"]["Update"] = {
+      status,
+    };
 
     // Set completed_at when task is completed
     if (status === "completed") {

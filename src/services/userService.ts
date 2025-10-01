@@ -38,7 +38,7 @@ export class UserService {
       .eq("id", userId)
       .single();
 
-    return { data, error };
+    return { data: data as User | null, error };
   }
 
   static async updateUserProfile(
