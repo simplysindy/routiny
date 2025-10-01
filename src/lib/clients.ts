@@ -5,7 +5,14 @@ import type { Database } from "../types/database";
 
 export const supabase: SupabaseClient<Database> = createClient<Database>(
   config.supabase.url,
-  config.supabase.anonKey
+  config.supabase.anonKey,
+  {
+    auth: {
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      persistSession: true,
+    },
+  }
 );
 
 export function createServerSupabaseClient(context: {

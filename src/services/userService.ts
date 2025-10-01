@@ -5,13 +5,27 @@ import type { PostgrestError } from "@supabase/supabase-js";
 export class UserService {
   // Auth methods
   static async signInWithEmail(email: string, redirectTo?: string) {
-    return await supabase.auth.signInWithOtp({
+    const redirectUrl = redirectTo || `${window.location.origin}/auth/callback`;
+
+    console.log("Sending magic link with config:", {
+      email,
+      redirectUrl,
+      origin: window.location.origin,
+    });
+
+    const result = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo:
-          redirectTo || `${window.location.origin}/auth/callback`,
+        emailRedirectTo: redirectUrl,
       },
     });
+
+    console.log("Magic link send result:", {
+      success: !result.error,
+      error: result.error?.message,
+    });
+
+    return result;
   }
 
   static async signOut() {
