@@ -23,11 +23,10 @@ export const Button: FC<ButtonProps> = ({
 
   const variants = {
     default:
-      "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary",
+      "bg-blue-600 text-white border-2 border-blue-700 hover:bg-blue-700 hover:border-blue-800 focus-visible:ring-blue-500 shadow-sm",
     outline:
-      "border border-input bg-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-primary",
-    ghost:
-      "hover:bg-accent hover:text-accent-foreground focus-visible:ring-primary",
+      "border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus-visible:ring-blue-500 shadow-sm",
+    ghost: "hover:bg-gray-100 text-gray-700 focus-visible:ring-blue-500",
   };
 
   const sizes = {
