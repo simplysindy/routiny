@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button, Textarea, Label } from '@/components/ui';
-import { useTaskStore } from '@/stores';
-import { useAuthStore } from '@/stores';
-import { cn } from '@/lib/utils';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useState } from "react";
+import { Button, Textarea, Label } from "@/components/ui";
+import { useTaskStore } from "@/stores";
+import { useAuthStore } from "@/stores";
+import { cn } from "@/lib/utils";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 export function TaskInput() {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -20,7 +20,8 @@ export function TaskInput() {
   const minLength = 3;
   const charCount = value.length;
   const isOverLimit = charCount > maxLength;
-  const isUnderLimit = value.trim().length < minLength && value.trim().length > 0;
+  const isUnderLimit =
+    value.trim().length < minLength && value.trim().length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +30,7 @@ export function TaskInput() {
 
     // Validation
     if (!trimmedValue) {
-      setError('Please enter a task description');
+      setError("Please enter a task description");
       return;
     }
 
@@ -44,7 +45,7 @@ export function TaskInput() {
     }
 
     if (!user?.id) {
-      setError('You must be logged in to create tasks');
+      setError("You must be logged in to create tasks");
       return;
     }
 
@@ -55,16 +56,20 @@ export function TaskInput() {
       const task = await createTask(trimmedValue, user.id);
 
       if (task) {
-        setValue('');
+        setValue("");
         setSuccess(true);
 
         // Hide success message after 2 seconds
         setTimeout(() => setSuccess(false), 2000);
       } else {
-        setError('Failed to create task. Please try again.');
+        setError("Failed to create task. Please try again.");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create task. Please try again.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to create task. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -96,12 +101,12 @@ export function TaskInput() {
           disabled={isLoading}
           rows={3}
           maxLength={maxLength + 50} // Allow typing a bit over to show error
-          aria-describedby={error ? 'task-error' : undefined}
+          aria-describedby={error ? "task-error" : undefined}
           aria-invalid={!!error}
           className={cn(
-            'min-h-[120px] text-base resize-none',
-            error && 'border-red-500 focus-visible:ring-red-500',
-            success && 'border-green-500 focus-visible:ring-green-500'
+            "min-h-[120px] resize-none text-base",
+            error && "border-red-500 focus-visible:ring-red-500",
+            success && "border-green-500 focus-visible:ring-green-500"
           )}
         />
 
@@ -109,10 +114,10 @@ export function TaskInput() {
         <div className="flex items-center justify-between text-sm">
           <span
             className={cn(
-              'transition-colors',
-              isOverLimit && 'text-red-600 font-medium',
-              isUnderLimit && 'text-gray-500',
-              !isOverLimit && !isUnderLimit && charCount > 0 && 'text-gray-500'
+              "transition-colors",
+              isOverLimit && "font-medium text-red-600",
+              isUnderLimit && "text-gray-500",
+              !isOverLimit && !isUnderLimit && charCount > 0 && "text-gray-500"
             )}
           >
             {charCount} / {maxLength} characters
@@ -121,7 +126,7 @@ export function TaskInput() {
           {isUnderLimit && (
             <span className="text-gray-500">
               {minLength - value.trim().length} more character
-              {minLength - value.trim().length !== 1 ? 's' : ''} needed
+              {minLength - value.trim().length !== 1 ? "s" : ""} needed
             </span>
           )}
         </div>
@@ -132,9 +137,12 @@ export function TaskInput() {
         <div
           id="task-error"
           role="alert"
-          className="flex items-start gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700 border border-red-200"
+          className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
         >
-          <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          <AlertCircle
+            className="mt-0.5 h-4 w-4 flex-shrink-0"
+            aria-hidden="true"
+          />
           <p>{error}</p>
         </div>
       )}
@@ -143,7 +151,7 @@ export function TaskInput() {
       {success && (
         <div
           role="status"
-          className="flex items-center gap-2 rounded-md bg-green-50 p-3 text-sm text-green-700 border border-green-200"
+          className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700"
         >
           <CheckCircle2 className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
           <p>Task created successfully!</p>
@@ -156,10 +164,10 @@ export function TaskInput() {
           type="submit"
           disabled={isLoading || isOverLimit || !value.trim()}
           loading={isLoading}
-          className="flex-1 sm:flex-none sm:min-w-[200px]"
+          className="flex-1 sm:min-w-[200px] sm:flex-none"
           size="lg"
         >
-          {isLoading ? 'Creating...' : 'Create Task'}
+          {isLoading ? "Creating..." : "Create Task"}
         </Button>
 
         {error && (

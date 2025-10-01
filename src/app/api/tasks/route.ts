@@ -34,10 +34,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getSession();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Parse request body
@@ -104,10 +101,7 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getSession();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get limit from query params

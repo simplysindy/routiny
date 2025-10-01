@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/stores';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/stores";
 
 export default function Home() {
   const router = useRouter();
@@ -13,10 +13,10 @@ export default function Home() {
     if (isInitialized) {
       if (user) {
         // Redirect authenticated users to task creation
-        router.push('/tasks/create');
+        router.push("/tasks/create");
       } else {
         // Redirect unauthenticated users to auth page
-        router.push('/auth');
+        router.push("/auth");
       }
     }
   }, [user, isInitialized, router]);

@@ -1,14 +1,14 @@
-import { FC, HTMLAttributes, ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import { FC, HTMLAttributes, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface BadgeProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'pending' | 'progress' | 'completed';
+  variant?: "default" | "pending" | "progress" | "completed";
   children: ReactNode;
 }
 
 export const Badge: FC<BadgeProps> = ({
   className,
-  variant = 'default',
+  variant = "default",
   children,
   ...props
 }) => {
@@ -23,7 +23,7 @@ export const Badge: FC<BadgeProps> = ({
     <div
       className={cn(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors",
-        "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+        "focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none",
         variants[variant],
         className
       )}

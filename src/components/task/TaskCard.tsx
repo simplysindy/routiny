@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { Card, Badge } from '@/components/ui';
-import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
-import type { Task } from '@/types';
+import { useMemo } from "react";
+import { Card, Badge } from "@/components/ui";
+import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
+import type { Task } from "@/types";
 
 interface TaskCardProps {
   task: Task;
@@ -11,28 +11,30 @@ interface TaskCardProps {
 }
 
 const statusLabels = {
-  pending: 'Pending',
-  in_progress: 'In Progress',
-  completed: 'Completed',
+  pending: "Pending",
+  in_progress: "In Progress",
+  completed: "Completed",
 };
 
 const statusVariants = {
-  pending: 'pending' as const,
-  in_progress: 'progress' as const,
-  completed: 'completed' as const,
+  pending: "pending" as const,
+  in_progress: "progress" as const,
+  completed: "completed" as const,
 };
 
 export function TaskCard({ task, className, onClick }: TaskCardProps) {
   const timeAgo = useMemo(() => {
     try {
-      return formatDistanceToNow(new Date(task.created_at), { addSuffix: true });
+      return formatDistanceToNow(new Date(task.created_at), {
+        addSuffix: true,
+      });
     } catch {
-      return 'Recently';
+      return "Recently";
     }
   }, [task.created_at]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+    if (onClick && (e.key === "Enter" || e.key === " ")) {
       e.preventDefault();
       onClick();
     }
@@ -41,8 +43,8 @@ export function TaskCard({ task, className, onClick }: TaskCardProps) {
   return (
     <Card
       className={cn(
-        'p-4 md:p-5 transition-all duration-200 hover:shadow-md cursor-pointer',
-        'border-gray-200 hover:border-primary/50',
+        "cursor-pointer p-4 transition-all duration-200 hover:shadow-md md:p-5",
+        "hover:border-primary/50 border-gray-200",
         className
       )}
       onClick={onClick}
@@ -62,7 +64,7 @@ export function TaskCard({ task, className, onClick }: TaskCardProps) {
         </div>
 
         {/* Task Title */}
-        <h3 className="text-sm md:text-base font-medium leading-snug line-clamp-2 text-gray-900">
+        <h3 className="line-clamp-2 text-sm leading-snug font-medium text-gray-900 md:text-base">
           {task.title}
         </h3>
       </div>
@@ -79,14 +81,14 @@ interface TaskListProps {
 
 export function TaskList({
   tasks,
-  emptyMessage = 'No tasks yet. Create your first one above!',
+  emptyMessage = "No tasks yet. Create your first one above!",
   className,
   onTaskClick,
 }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div
-        className={cn('text-center py-12 px-4 text-gray-500', className)}
+        className={cn("px-4 py-12 text-center text-gray-500", className)}
         role="status"
       >
         <p className="text-base">{emptyMessage}</p>
@@ -97,7 +99,7 @@ export function TaskList({
   return (
     <div
       className={cn(
-        'grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+        "grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3",
         className
       )}
     >
