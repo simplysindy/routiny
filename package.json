@@ -16,15 +16,22 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug"
+    "test:e2e:debug": "playwright test --debug",
+    "bmad:refresh": "bmad-method install -f -i codex",
+    "bmad:list": "bmad-method list:agents",
+    "bmad:validate": "bmad-method validate"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.2",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
     "dotenv": "^17.2.2",
+    "lucide-react": "^0.544.0",
     "next": "15.5.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "tailwind-merge": "^3.3.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

@@ -1,0 +1,179 @@
+'use client';
+
+import { useState } from 'react';
+import { Button, Textarea, Label } from '@/components/ui';
+import { useTaskStore } from '@/stores';
+import { useAuthStore } from '@/stores';
+import { cn } from '@/lib/utils';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
+
+export function TaskInput() {
+  const [value, setValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const createTask = useTaskStore((state) => state.createTask);
+  const user = useAuthStore((state) => state.user);
+
+  const maxLength = 500;
+  const minLength = 3;
+  const charCount = value.length;
+  const isOverLimit = charCount > maxLength;
+  const isUnderLimit = value.trim().length < minLength && value.trim().length > 0;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const trimmedValue = value.trim();
+
+    // Validation
+    if (!trimmedValue) {
+      setError('Please enter a task description');
+      return;
+    }
+
+    if (trimmedValue.length < minLength) {
+      setError(`Task must be at least ${minLength} characters`);
+      return;
+    }
+
+    if (trimmedValue.length > maxLength) {
+      setError(`Task must not exceed ${maxLength} characters`);
+      return;
+    }
+
+    if (!user?.id) {
+      setError('You must be logged in to create tasks');
+      return;
+    }
+
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const task = await createTask(trimmedValue, user.id);
+
+      if (task) {
+        setValue('');
+        setSuccess(true);
+
+        // Hide success message after 2 seconds
+        setTimeout(() => setSuccess(false), 2000);
+      } else {
+        setError('Failed to create task. Please try again.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create task. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+    // Clear error when user starts typing
+    if (error) setError(null);
+    if (success) setSuccess(false);
+  };
+
+  const handleRetry = () => {
+    handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="task-input" className="text-base font-semibold">
+          What needs to get done?
+        </Label>
+
+        <Textarea
+          id="task-input"
+          value={value}
+          onChange={handleChange}
+          placeholder="Describe your task in detail..."
+          disabled={isLoading}
+          rows={3}
+          maxLength={maxLength + 50} // Allow typing a bit over to show error
+          aria-describedby={error ? 'task-error' : undefined}
+          aria-invalid={!!error}
+          className={cn(
+            'min-h-[120px] text-base resize-none',
+            error && 'border-red-500 focus-visible:ring-red-500',
+            success && 'border-green-500 focus-visible:ring-green-500'
+          )}
+        />
+
+        {/* Character Counter */}
+        <div className="flex items-center justify-between text-sm">
+          <span
+            className={cn(
+              'transition-colors',
+              isOverLimit && 'text-red-600 font-medium',
+              isUnderLimit && 'text-gray-500',
+              !isOverLimit && !isUnderLimit && charCount > 0 && 'text-gray-500'
+            )}
+          >
+            {charCount} / {maxLength} characters
+          </span>
+
+          {isUnderLimit && (
+            <span className="text-gray-500">
+              {minLength - value.trim().length} more character
+              {minLength - value.trim().length !== 1 ? 's' : ''} needed
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div
+          id="task-error"
+          role="alert"
+          className="flex items-start gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700 border border-red-200"
+        >
+          <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          <p>{error}</p>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {success && (
+        <div
+          role="status"
+          className="flex items-center gap-2 rounded-md bg-green-50 p-3 text-sm text-green-700 border border-green-200"
+        >
+          <CheckCircle2 className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+          <p>Task created successfully!</p>
+        </div>
+      )}
+
+      {/* Submit Button */}
+      <div className="flex gap-3">
+        <Button
+          type="submit"
+          disabled={isLoading || isOverLimit || !value.trim()}
+          loading={isLoading}
+          className="flex-1 sm:flex-none sm:min-w-[200px]"
+          size="lg"
+        >
+          {isLoading ? 'Creating...' : 'Create Task'}
+        </Button>
+
+        {error && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleRetry}
+            disabled={isLoading}
+            size="lg"
+          >
+            Retry
+          </Button>
+        )}
+      </div>
+    </form>
+  );
+}
