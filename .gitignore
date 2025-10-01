@@ -56,3 +56,7 @@ next-env.d.ts
 .Trashes
 ehthumbs.db
 Thumbs.db
+# BMAD (local only)
+.bmad-core/
+.bmad-*/
+AGENTS.md
