@@ -4,15 +4,14 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TaskInput, TaskList } from "@/components/task";
 import { useTaskStore } from "@/stores";
-import { useAuthStore } from "@/stores";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function CreateTaskPage() {
   const router = useRouter();
   const tasks = useTaskStore((state) => state.tasks);
   const fetchTasks = useTaskStore((state) => state.fetchTasks);
   const loading = useTaskStore((state) => state.loading);
-  const user = useAuthStore((state) => state.user);
-  const isInitialized = useAuthStore((state) => state.isInitialized);
+  const { user, isInitialized } = useAuth();
 
   // Redirect to auth if not logged in
   useEffect(() => {

@@ -154,8 +154,8 @@ export default function AuthCallbackPage() {
             console.error("Error checking/creating user profile:", err);
           }
 
-          console.log("Redirecting to dashboard");
-          window.location.href = "/dashboard";
+          console.log("Redirecting to tasks page");
+          window.location.href = "/tasks/create";
         } else {
           console.error("No session after callback");
           console.error("This usually means:");
