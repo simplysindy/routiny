@@ -8,13 +8,21 @@ vi.mock("@supabase/ssr", () => ({
     auth: {
       getSession: vi.fn(),
     },
+    from: vi.fn(() => ({
+      insert: vi.fn(() => ({
+        select: vi.fn(() => ({
+          single: vi.fn(),
+        })),
+      })),
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          order: vi.fn(() => ({
+            limit: vi.fn(),
+          })),
+        })),
+      })),
+    })),
   })),
-}));
-
-vi.mock("@/services", () => ({
-  taskRepository: {
-    create: vi.fn(),
-  },
 }));
 
 vi.mock("@/services/openrouterService", () => ({
@@ -39,7 +47,6 @@ vi.mock("@/lib/config", () => ({
 }));
 
 import { createServerClient } from "@supabase/ssr";
-import { taskRepository } from "@/services";
 import { generateSingleDayBreakdown } from "@/services/openrouterService";
 import { checkRateLimit } from "@/lib/rateLimiter";
 
@@ -53,12 +60,39 @@ describe("POST /api/tasks - AI Breakdown Integration", () => {
       user: { id: "user-123", email: "test@example.com" },
     };
 
+    const mockTaskData = {
+      id: "task-123",
+      user_id: "user-123",
+      title: "Clean my room",
+      duration_days: 1,
+      task_type: "single-day",
+      current_day: 1,
+      ai_breakdown: [
+        "Gather cleaning supplies",
+        "Pick up items from floor",
+        "Wipe surfaces",
+        "Vacuum floor",
+        "Make bed",
+      ],
+      status: "pending",
+      completed_at: null,
+      created_at: new Date().toISOString(),
+    };
+
+    const mockSingle = vi
+      .fn()
+      .mockResolvedValue({ data: mockTaskData, error: null });
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
+    const mockFrom = vi.fn().mockReturnValue({ insert: mockInsert });
+
     const mockSupabaseClient = {
       auth: {
         getSession: vi
           .fn()
           .mockResolvedValue({ data: { session: mockSession } }),
       },
+      from: mockFrom,
     };
 
     vi.mocked(createServerClient).mockReturnValue(
@@ -75,29 +109,6 @@ describe("POST /api/tasks - AI Breakdown Integration", () => {
       "Vacuum floor",
       "Make bed",
     ]);
-
-    vi.mocked(taskRepository.create).mockResolvedValue({
-      data: {
-        id: "task-123",
-        user_id: "user-123",
-        title: "Clean my room",
-        duration_days: 1,
-        task_type: "single-day",
-        current_day: 1,
-        ai_breakdown: [
-          "Gather cleaning supplies",
-          "Pick up items from floor",
-          "Wipe surfaces",
-          "Vacuum floor",
-          "Make bed",
-        ],
-        status: "pending",
-        completed_at: null,
-        created_at: new Date().toISOString(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
-      error: null,
-    });
 
     const mockRequest = {
       json: async () => ({ title: "Clean my room", duration_days: 1 }),
@@ -165,19 +176,6 @@ describe("POST /api/tasks - AI Breakdown Integration", () => {
       user: { id: "user-123", email: "test@example.com" },
     };
 
-    const mockSupabaseClient = {
-      auth: {
-        getSession: vi
-          .fn()
-          .mockResolvedValue({ data: { session: mockSession } }),
-      },
-    };
-
-    vi.mocked(createServerClient).mockReturnValue(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockSupabaseClient as any
-    );
-
     vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true });
 
     // Mock OpenRouter failure - it will use fallback internally
@@ -189,28 +187,45 @@ describe("POST /api/tasks - AI Breakdown Integration", () => {
       "Mark the task as complete",
     ]);
 
-    vi.mocked(taskRepository.create).mockResolvedValue({
-      data: {
-        id: "task-123",
-        user_id: "user-123",
-        title: "Test task",
-        duration_days: 1,
-        task_type: "single-day",
-        current_day: 1,
-        ai_breakdown: [
-          "Gather any materials or tools you'll need",
-          "Start working on: Test task",
-          "Complete the main task",
-          "Review your work",
-          "Mark the task as complete",
-        ],
-        status: "pending",
-        completed_at: null,
-        created_at: new Date().toISOString(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
-      error: null,
-    });
+    const mockTaskData = {
+      id: "task-123",
+      user_id: "user-123",
+      title: "Test task",
+      duration_days: 1,
+      task_type: "single-day",
+      current_day: 1,
+      ai_breakdown: [
+        "Gather any materials or tools you'll need",
+        "Start working on: Test task",
+        "Complete the main task",
+        "Review your work",
+        "Mark the task as complete",
+      ],
+      status: "pending",
+      completed_at: null,
+      created_at: new Date().toISOString(),
+    };
+
+    const mockSingle = vi
+      .fn()
+      .mockResolvedValue({ data: mockTaskData, error: null });
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
+    const mockFrom = vi.fn().mockReturnValue({ insert: mockInsert });
+
+    const mockSupabaseClient = {
+      auth: {
+        getSession: vi
+          .fn()
+          .mockResolvedValue({ data: { session: mockSession } }),
+      },
+      from: mockFrom,
+    };
+
+    vi.mocked(createServerClient).mockReturnValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockSupabaseClient as any
+    );
 
     const mockRequest = {
       json: async () => ({ title: "Test task", duration_days: 1 }),
@@ -233,35 +248,39 @@ describe("POST /api/tasks - AI Breakdown Integration", () => {
       user: { id: "user-123", email: "test@example.com" },
     };
 
+    const mockTaskData = {
+      id: "task-123",
+      user_id: "user-123",
+      title: "Exercise daily",
+      duration_days: 7,
+      task_type: "multi-day",
+      current_day: 1,
+      ai_breakdown: [],
+      status: "pending",
+      completed_at: null,
+      created_at: new Date().toISOString(),
+    };
+
+    const mockSingle = vi
+      .fn()
+      .mockResolvedValue({ data: mockTaskData, error: null });
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
+    const mockFrom = vi.fn().mockReturnValue({ insert: mockInsert });
+
     const mockSupabaseClient = {
       auth: {
         getSession: vi
           .fn()
           .mockResolvedValue({ data: { session: mockSession } }),
       },
+      from: mockFrom,
     };
 
     vi.mocked(createServerClient).mockReturnValue(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockSupabaseClient as any
     );
-
-    vi.mocked(taskRepository.create).mockResolvedValue({
-      data: {
-        id: "task-123",
-        user_id: "user-123",
-        title: "Exercise daily",
-        duration_days: 7,
-        task_type: "multi-day",
-        current_day: 1,
-        ai_breakdown: [],
-        status: "pending",
-        completed_at: null,
-        created_at: new Date().toISOString(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
-      error: null,
-    });
 
     const mockRequest = {
       json: async () => ({ title: "Exercise daily", duration_days: 7 }),
