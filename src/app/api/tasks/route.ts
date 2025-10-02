@@ -118,7 +118,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Create task with AI breakdown
-    console.log("Creating task in database with breakdown:", aiBreakdown.length, "steps");
+    console.log(
+      "Creating task in database with breakdown:",
+      aiBreakdown.length,
+      "steps"
+    );
     const { data, error } = await taskRepository.create(
       title.trim(),
       duration_days,
@@ -139,7 +143,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Unexpected error in POST /api/tasks:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
