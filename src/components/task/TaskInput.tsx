@@ -10,7 +10,7 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 export function TaskInput() {
   const [value, setValue] = useState("");
-  const [duration, setDuration] = useState(1);
+  const [duration, setDuration] = useState<number | null>(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -52,8 +52,8 @@ export function TaskInput() {
     }
 
     // Validate duration
-    if (!Number.isInteger(duration) || duration < 1) {
-      setError("Duration must be a positive number");
+    if (duration === null || !Number.isInteger(duration) || duration < 1) {
+      setError("Please select or enter a valid duration");
       return;
     }
 
@@ -95,8 +95,11 @@ export function TaskInput() {
     handleSubmit({ preventDefault: () => {} } as React.FormEvent);
   };
 
-  const taskTypeIndicator =
-    duration === 1 ? "📝 One-time task" : `🎯 ${duration}-day habit`;
+  const taskTypeIndicator = duration === null
+    ? "⏱️ Enter custom duration"
+    : duration === 1
+    ? "📝 One-time task"
+    : `🎯 ${duration}-day habit`;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -184,7 +187,7 @@ export function TaskInput() {
       <div className="flex gap-3">
         <Button
           type="submit"
-          disabled={isLoading || isOverLimit || !value.trim()}
+          disabled={isLoading || isOverLimit || !value.trim() || duration === null}
           loading={isLoading}
           className="flex-1 sm:min-w-[200px] sm:flex-none"
           size="lg"

@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
 interface DurationSelectorProps {
-  value: number;
-  onChange: (duration: number) => void;
+  value: number | null;
+  onChange: (duration: number | null) => void;
   className?: string;
 }
 
@@ -26,7 +26,7 @@ export function DurationSelector({
   const [customValue, setCustomValue] = useState("");
   const [customError, setCustomError] = useState<string | null>(null);
 
-  const isCustom = !PRESET_DURATIONS.some((preset) => preset.value === value);
+  const isCustom = value === null || !PRESET_DURATIONS.some((preset) => preset.value === value);
 
   const handlePresetChange = (presetValue: number) => {
     setCustomError(null);
@@ -35,13 +35,14 @@ export function DurationSelector({
   };
 
   const handleCustomSelect = () => {
-    // When custom is selected, default to 1 if no valid custom value
+    // When custom is selected, set value to null to indicate no valid selection yet
+    // Only use existing customValue if it's valid
     if (customValue && isValidDuration(customValue)) {
       onChange(Number(customValue));
     } else {
-      onChange(1);
-      setCustomValue("1");
+      onChange(null); // No valid value yet - user needs to input one
     }
+    setCustomError(null);
   };
 
   const handleCustomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
