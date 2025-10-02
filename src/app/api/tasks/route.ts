@@ -105,10 +105,12 @@ export async function POST(request: NextRequest) {
 
       // Generate AI breakdown
       try {
+        console.log("Calling OpenRouter for task:", title.trim());
         aiBreakdown = await generateSingleDayBreakdown(
           title.trim(),
           session.user.id
         );
+        console.log("OpenRouter returned breakdown:", aiBreakdown);
       } catch (error) {
         console.error("Error generating AI breakdown:", error);
         // Continue with empty breakdown - fallback is handled in service
@@ -116,6 +118,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create task with AI breakdown
+    console.log("Creating task in database with breakdown:", aiBreakdown.length, "steps");
     const { data, error } = await taskRepository.create(
       title.trim(),
       duration_days,
@@ -124,18 +127,19 @@ export async function POST(request: NextRequest) {
     );
 
     if (error) {
-      console.error("Error creating task:", error);
+      console.error("Error creating task in database:", error);
       return NextResponse.json(
-        { error: "Failed to create task" },
+        { error: "Failed to create task", details: error.message },
         { status: 500 }
       );
     }
 
+    console.log("Task created successfully:", data?.id);
     return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
     console.error("Unexpected error in POST /api/tasks:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
