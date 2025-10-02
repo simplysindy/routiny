@@ -25,7 +25,9 @@ describe("DurationSelector", () => {
 
   it("should show custom input when custom option is selected", async () => {
     const onChange = vi.fn();
-    const { rerender } = render(<DurationSelector value={1} onChange={onChange} />);
+    const { rerender } = render(
+      <DurationSelector value={1} onChange={onChange} />
+    );
 
     const customOption = screen.getByLabelText("Custom");
     fireEvent.click(customOption);
@@ -39,7 +41,9 @@ describe("DurationSelector", () => {
 
   it("should validate custom duration and show error for negative values", () => {
     const onChange = vi.fn();
-    const { rerender } = render(<DurationSelector value={1} onChange={onChange} />);
+    const { rerender } = render(
+      <DurationSelector value={1} onChange={onChange} />
+    );
 
     // Select custom option
     const customOption = screen.getByLabelText("Custom");
@@ -59,7 +63,9 @@ describe("DurationSelector", () => {
 
   it("should validate custom duration and show error for zero", () => {
     const onChange = vi.fn();
-    const { rerender } = render(<DurationSelector value={1} onChange={onChange} />);
+    const { rerender } = render(
+      <DurationSelector value={1} onChange={onChange} />
+    );
 
     // Select custom option and rerender
     const customOption = screen.getByLabelText("Custom");
@@ -77,7 +83,9 @@ describe("DurationSelector", () => {
 
   it("should validate custom duration and show error for values over 365", () => {
     const onChange = vi.fn();
-    const { rerender } = render(<DurationSelector value={1} onChange={onChange} />);
+    const { rerender } = render(
+      <DurationSelector value={1} onChange={onChange} />
+    );
 
     // Select custom option and rerender
     const customOption = screen.getByLabelText("Custom");
@@ -95,7 +103,9 @@ describe("DurationSelector", () => {
 
   it("should accept valid custom duration", () => {
     const onChange = vi.fn();
-    const { rerender } = render(<DurationSelector value={1} onChange={onChange} />);
+    const { rerender } = render(
+      <DurationSelector value={1} onChange={onChange} />
+    );
 
     // Select custom option and rerender
     const customOption = screen.getByLabelText("Custom");
@@ -121,7 +131,9 @@ describe("DurationSelector", () => {
 
   it("should switch from custom to preset and clear custom value", () => {
     const onChange = vi.fn();
-    const { rerender } = render(<DurationSelector value={1} onChange={onChange} />);
+    const { rerender } = render(
+      <DurationSelector value={1} onChange={onChange} />
+    );
 
     // Select custom and enter a value
     const customOption = screen.getByLabelText("Custom");

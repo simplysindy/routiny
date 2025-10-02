@@ -96,17 +96,12 @@ export function TaskInput() {
   };
 
   const taskTypeIndicator =
-    duration === 1
-      ? "📝 One-time task"
-      : `🎯 ${duration}-day habit`;
+    duration === 1 ? "📝 One-time task" : `🎯 ${duration}-day habit`;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Duration Selector */}
-      <DurationSelector
-        value={duration}
-        onChange={setDuration}
-      />
+      <DurationSelector value={duration} onChange={setDuration} />
 
       {/* Divider */}
       <div className="border-t border-gray-200" />

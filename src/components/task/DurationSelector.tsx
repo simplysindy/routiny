@@ -57,18 +57,15 @@ export function DurationSelector({
       setCustomError(null);
       onChange(Number(inputValue));
     } else {
-      setCustomError("Duration must be a positive number between 1 and 365 days");
+      setCustomError(
+        "Duration must be a positive number between 1 and 365 days"
+      );
     }
   };
 
   const isValidDuration = (val: string): boolean => {
     const num = Number(val);
-    return (
-      !isNaN(num) &&
-      Number.isInteger(num) &&
-      num > 0 &&
-      num <= 365
-    );
+    return !isNaN(num) && Number.isInteger(num) && num > 0 && num <= 365;
   };
 
   return (
@@ -88,7 +85,7 @@ export function DurationSelector({
             key={preset.value}
             className={cn(
               "relative flex min-h-[44px] cursor-pointer items-center justify-center rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all",
-              "hover:border-gray-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2",
+              "focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 focus-within:outline-none hover:border-gray-400",
               value === preset.value
                 ? "border-blue-600 bg-blue-50 text-blue-700"
                 : "border-gray-300 bg-white text-gray-700"
@@ -106,7 +103,7 @@ export function DurationSelector({
             <span>{preset.label}</span>
             {value === preset.value && (
               <Check
-                className="absolute right-2 top-2 h-4 w-4 text-blue-600"
+                className="absolute top-2 right-2 h-4 w-4 text-blue-600"
                 aria-hidden="true"
               />
             )}
@@ -117,7 +114,7 @@ export function DurationSelector({
         <label
           className={cn(
             "relative flex min-h-[44px] cursor-pointer items-center justify-center rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all",
-            "hover:border-gray-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2",
+            "focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 focus-within:outline-none hover:border-gray-400",
             isCustom
               ? "border-blue-600 bg-blue-50 text-blue-700"
               : "border-gray-300 bg-white text-gray-700"
@@ -135,7 +132,7 @@ export function DurationSelector({
           <span>Custom</span>
           {isCustom && (
             <Check
-              className="absolute right-2 top-2 h-4 w-4 text-blue-600"
+              className="absolute top-2 right-2 h-4 w-4 text-blue-600"
               aria-hidden="true"
             />
           )}
@@ -161,7 +158,7 @@ export function DurationSelector({
             aria-describedby={customError ? "duration-error" : undefined}
             className={cn(
               "block w-full max-w-[200px] rounded-lg border px-3 py-2 text-sm shadow-sm transition-colors",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+              "focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none",
               customError
                 ? "border-red-500 focus:ring-red-500"
                 : "border-gray-300"

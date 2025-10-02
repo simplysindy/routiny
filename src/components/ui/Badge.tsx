@@ -2,7 +2,13 @@ import { FC, HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface BadgeProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "pending" | "progress" | "completed" | "blue" | "purple";
+  variant?:
+    | "default"
+    | "pending"
+    | "progress"
+    | "completed"
+    | "blue"
+    | "purple";
   children: ReactNode;
 }
 

@@ -15,10 +15,16 @@ export class TaskService {
   ): Promise<{ data: Task | null; error: PostgrestError | Error | null }> {
     try {
       // Validate duration
-      if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 365) {
+      if (
+        !Number.isInteger(durationDays) ||
+        durationDays < 1 ||
+        durationDays > 365
+      ) {
         return {
           data: null,
-          error: new Error("Duration must be a positive integer between 1 and 365 days"),
+          error: new Error(
+            "Duration must be a positive integer between 1 and 365 days"
+          ),
         };
       }
 
