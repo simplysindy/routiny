@@ -13,16 +13,12 @@ export class TaskService {
     userId: string
   ): Promise<{ data: Task | null; error: PostgrestError | Error | null }> {
     try {
-      const insertPayload: Array<
-        Database["public"]["Tables"]["tasks"]["Insert"]
-      > = [
-        {
-          user_id: userId,
-          title,
-          ai_breakdown: [] as string[], // Will be populated by AI in Story 1.4
-          status: "pending",
-        },
-      ];
+      const insertPayload: Database["public"]["Tables"]["tasks"]["Insert"] = {
+        user_id: userId,
+        title,
+        ai_breakdown: [], // Will be populated by AI in Story 1.4
+        status: "pending",
+      };
 
       const { data, error } = await supabase
         .from("tasks")
