@@ -42,6 +42,7 @@ export async function middleware(request: NextRequest) {
   });
 
   // Protected routes that require authentication
+  // TODO: /dashboard route doesn't exist - remove if not planning to create it
   const protectedRoutes = ["/dashboard", "/tasks", "/profile"];
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)

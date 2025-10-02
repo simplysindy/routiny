@@ -9,6 +9,10 @@ interface Config {
   };
   openRouter: {
     apiKey?: string;
+    model: string;
+    temperature: number;
+    timeoutMs: number;
+    maxRetries: number;
   };
   upstash: {
     redisUrl?: string;
@@ -18,6 +22,12 @@ interface Config {
     secretKey?: string;
     publicKey?: string;
     host?: string;
+  };
+  rateLimit: {
+    taskBreakdown: {
+      points: number;
+      durationSeconds: number;
+    };
   };
   app: {
     url: string;
@@ -70,6 +80,10 @@ export const config: Config = {
   },
   openRouter: {
     apiKey: OPENROUTER_API_KEY,
+    model: "moonshotai/kimi-k2-0905", // Kimi K2 model
+    temperature: 0.7, // Moderate creativity for task breakdown
+    timeoutMs: 10000, // 10 second timeout
+    maxRetries: 2, // Maximum retry attempts for API failures
   },
   upstash: {
     redisUrl: UPSTASH_REDIS_REST_URL,
@@ -79,6 +93,12 @@ export const config: Config = {
     secretKey: LANGFUSE_SECRET_KEY,
     publicKey: LANGFUSE_PUBLIC_KEY,
     host: LANGFUSE_HOST,
+  },
+  rateLimit: {
+    taskBreakdown: {
+      points: 10, // 10 requests
+      durationSeconds: 3600, // per 1 hour
+    },
   },
   app: {
     url: requireEnv(NEXT_PUBLIC_APP_URL, "NEXT_PUBLIC_APP_URL"),

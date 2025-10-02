@@ -1,18 +1,11 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { createServerClient } from "@supabase/ssr";
+import { type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient, createServerClient } from "@supabase/ssr";
 import { config } from "./config";
 import type { Database } from "../types/database";
 
-export const supabase: SupabaseClient<Database> = createClient<Database>(
+export const supabase: SupabaseClient<Database> = createBrowserClient<Database>(
   config.supabase.url,
-  config.supabase.anonKey,
-  {
-    auth: {
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      persistSession: true,
-    },
-  }
+  config.supabase.anonKey
 );
 
 export function createServerSupabaseClient(context: {

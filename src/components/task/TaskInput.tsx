@@ -6,12 +6,13 @@ import { DurationSelector } from "@/components/task";
 import { useTaskStore } from "@/stores";
 import { useAuthStore } from "@/stores";
 import { cn } from "@/lib/utils";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
 
 export function TaskInput() {
   const [value, setValue] = useState("");
   const [duration, setDuration] = useState<number | null>(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -60,6 +61,11 @@ export function TaskInput() {
     setError(null);
     setIsLoading(true);
 
+    // Show AI generation indicator for single-day tasks
+    if (duration === 1) {
+      setIsGeneratingAI(true);
+    }
+
     try {
       const task = await createTask(trimmedValue, duration, user.id);
 
@@ -81,6 +87,7 @@ export function TaskInput() {
       );
     } finally {
       setIsLoading(false);
+      setIsGeneratingAI(false);
     }
   };
 
@@ -157,6 +164,20 @@ export function TaskInput() {
           )}
         </div>
       </div>
+
+      {/* AI Generation Loading Message */}
+      {isGeneratingAI && (
+        <div
+          role="status"
+          className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700"
+        >
+          <Sparkles
+            className="h-4 w-4 flex-shrink-0 animate-pulse"
+            aria-hidden="true"
+          />
+          <p>Generating AI breakdown...</p>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (

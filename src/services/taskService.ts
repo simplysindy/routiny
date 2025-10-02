@@ -6,12 +6,13 @@ import type { Database } from "../types/database";
 export class TaskService {
   /**
    * Create a new task
-   * Note: AI breakdown will be added in Stories 1.5 & 1.6
+   * Story 1.5: Now supports AI breakdown for single-day tasks
    */
   static async createTask(
     title: string,
     durationDays: number = 1,
-    userId: string
+    userId: string,
+    aiBreakdown: string[] = []
   ): Promise<{ data: Task | null; error: PostgrestError | Error | null }> {
     try {
       // Validate duration
@@ -37,7 +38,7 @@ export class TaskService {
         duration_days: durationDays,
         task_type: taskType,
         current_day: 1,
-        ai_breakdown: [], // Will be populated by AI in Stories 1.5 & 1.6
+        ai_breakdown: aiBreakdown, // Now accepts AI-generated breakdown
         status: "pending",
       };
 
@@ -130,8 +131,12 @@ export class TaskService {
 
 // Repository functions for direct use
 export const taskRepository = {
-  create: (title: string, durationDays: number, userId: string) =>
-    TaskService.createTask(title, durationDays, userId),
+  create: (
+    title: string,
+    durationDays: number,
+    userId: string,
+    aiBreakdown?: string[]
+  ) => TaskService.createTask(title, durationDays, userId, aiBreakdown),
   findByUserId: (userId: string, limit?: number) =>
     TaskService.fetchTasks(userId, limit),
   findById: (taskId: string) => TaskService.getTaskById(taskId),

@@ -27,10 +27,19 @@ export default function CreateTaskPage() {
   }, [user?.id, fetchTasks]);
 
   // Show loading state while checking auth
-  if (!isInitialized || !user) {
+  if (!isInitialized) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="animate-pulse text-gray-500">Loading...</div>
+      </div>
+    );
+  }
+
+  // If initialized but no user, middleware will redirect to /auth
+  if (!user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse text-gray-500">Redirecting...</div>
       </div>
     );
   }

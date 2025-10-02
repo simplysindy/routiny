@@ -10,7 +10,7 @@ test.describe("Authentication Flow", () => {
   test("should redirect to auth page when not authenticated", async ({
     page,
   }) => {
-    await page.goto("/dashboard");
+    await page.goto("/tasks/create");
 
     // Should redirect to auth page
     await page.waitForURL("/auth");
@@ -128,11 +128,11 @@ test.describe("Authentication Flow", () => {
       );
     }, process.env.TEST_AUTH_TOKEN);
 
-    await page.goto("/dashboard");
+    await page.goto("/tasks/create");
     await page.reload();
 
-    // Should remain on dashboard after refresh
-    expect(page.url()).toContain("/dashboard");
+    // Should remain on tasks page after refresh
+    expect(page.url()).toContain("/tasks");
   });
 
   test("should clear auth state on sign out", async ({ page }) => {
@@ -150,7 +150,7 @@ test.describe("Authentication Flow", () => {
       );
     });
 
-    await page.goto("/dashboard");
+    await page.goto("/tasks/create");
 
     // Find and click sign out button
     const signOutButton = page.locator(

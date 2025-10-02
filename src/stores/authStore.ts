@@ -89,10 +89,17 @@ export const useAuthStore = create<AuthStore>()(
               isInitialized: true,
             });
           } else {
-            console.error("Error fetching user profile:", profileError);
+            console.error("Error fetching user profile:", {
+              error: profileError,
+              hasProfile: !!userProfile,
+              userId: session.user.id,
+              sessionExists: !!session,
+            });
+
+            // Keep session but set user to null - middleware will handle redirect
             set({
               user: null,
-              session: null,
+              session,
               isLoading: false,
               isInitialized: true,
             });

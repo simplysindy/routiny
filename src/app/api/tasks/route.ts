@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { config as appConfig } from "@/lib/config";
 import { taskRepository } from "@/services";
+import { generateSingleDayBreakdown } from "@/services/openrouterService";
+import { checkRateLimit } from "@/lib/rateLimiter";
+import { getLangfuse } from "@/lib/langfuse";
 import type { Database } from "@/types/database";
 
 /**
  * POST /api/tasks - Create a new task
- * Note: AI breakdown integration will be added in Stories 1.5 & 1.6
+ * Story 1.5: AI breakdown integration for single-day tasks with OpenRouter
  */
 export async function POST(request: NextRequest) {
   try {
@@ -63,11 +66,61 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create task
+    // Calculate task type
+    const taskType = duration_days === 1 ? "single-day" : "multi-day";
+    let aiBreakdown: string[] = [];
+
+    // Generate AI breakdown for single-day tasks
+    if (taskType === "single-day") {
+      // Check rate limit
+      const rateLimit = await checkRateLimit(session.user.id);
+
+      if (!rateLimit.allowed) {
+        return NextResponse.json(
+          {
+            error: "Rate limit exceeded",
+            message:
+              "You've reached the hourly limit for AI breakdowns. Please try again later.",
+            retryAfter: rateLimit.retryAfter,
+          },
+          {
+            status: 429,
+            headers: {
+              "Retry-After": String(rateLimit.retryAfter || 3600),
+            },
+          }
+        );
+      }
+
+      // Log rate limit event to Langfuse
+      const langfuse = getLangfuse();
+      langfuse?.event({
+        name: "rate-limit-check",
+        metadata: {
+          userId: session.user.id,
+          allowed: true,
+          taskTitle: title.trim(),
+        },
+      });
+
+      // Generate AI breakdown
+      try {
+        aiBreakdown = await generateSingleDayBreakdown(
+          title.trim(),
+          session.user.id
+        );
+      } catch (error) {
+        console.error("Error generating AI breakdown:", error);
+        // Continue with empty breakdown - fallback is handled in service
+      }
+    }
+
+    // Create task with AI breakdown
     const { data, error } = await taskRepository.create(
       title.trim(),
       duration_days,
-      session.user.id
+      session.user.id,
+      aiBreakdown
     );
 
     if (error) {
