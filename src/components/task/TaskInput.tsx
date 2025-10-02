@@ -95,11 +95,12 @@ export function TaskInput() {
     handleSubmit({ preventDefault: () => {} } as React.FormEvent);
   };
 
-  const taskTypeIndicator = duration === null
-    ? "⏱️ Enter custom duration"
-    : duration === 1
-    ? "📝 One-time task"
-    : `🎯 ${duration}-day habit`;
+  const taskTypeIndicator =
+    duration === null
+      ? "⏱️ Enter custom duration"
+      : duration === 1
+        ? "📝 One-time task"
+        : `🎯 ${duration}-day habit`;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -187,7 +188,9 @@ export function TaskInput() {
       <div className="flex gap-3">
         <Button
           type="submit"
-          disabled={isLoading || isOverLimit || !value.trim() || duration === null}
+          disabled={
+            isLoading || isOverLimit || !value.trim() || duration === null
+          }
           loading={isLoading}
           className="flex-1 sm:min-w-[200px] sm:flex-none"
           size="lg"

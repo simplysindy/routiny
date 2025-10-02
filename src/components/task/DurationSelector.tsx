@@ -26,7 +26,9 @@ export function DurationSelector({
   const [customValue, setCustomValue] = useState("");
   const [customError, setCustomError] = useState<string | null>(null);
 
-  const isCustom = value === null || !PRESET_DURATIONS.some((preset) => preset.value === value);
+  const isCustom =
+    value === null ||
+    !PRESET_DURATIONS.some((preset) => preset.value === value);
 
   const handlePresetChange = (presetValue: number) => {
     setCustomError(null);
