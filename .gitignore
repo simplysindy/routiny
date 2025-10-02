@@ -8,6 +8,10 @@
 docs/
 README.md
 
+# Ignore only specific Supabase temp files (keep migrations, config, etc.)
+supabase/.temp/
+supabase/.branches/
+
 # dependencies
 /node_modules
 /.pnp
