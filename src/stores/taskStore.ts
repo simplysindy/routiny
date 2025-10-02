@@ -29,10 +29,12 @@ export const useTaskStore = create<TaskStore>((set) => ({
   error: null,
 
   createTask: async (title: string, durationDays: number, userId: string) => {
+    console.log("createTask called with:", { title, durationDays, userId });
     set({ loading: true, error: null });
 
     try {
       // Call API endpoint to leverage OpenRouter for AI breakdown
+      console.log("About to fetch /api/tasks");
       const response = await fetch("/api/tasks", {
         method: "POST",
         headers: {
@@ -46,6 +48,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error("API Error:", response.status, errorData);
         throw new Error(errorData.error || "Failed to create task");
       }
 
@@ -64,6 +67,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
       set({ loading: false });
       return null;
     } catch (err) {
+      console.error("Task creation error:", err);
       const errorMessage =
         err instanceof Error ? err.message : "Failed to create task";
       set({ loading: false, error: errorMessage });
