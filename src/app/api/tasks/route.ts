@@ -123,8 +123,6 @@ export async function POST(request: NextRequest) {
       "steps"
     );
 
-    const taskType = duration_days === 1 ? "single-day" : "multi-day";
-
     const { data, error } = await supabase
       .from("tasks")
       .insert({
