@@ -53,7 +53,7 @@ export function TaskCard({ task, className, onClick }: TaskCardProps) {
       onKeyDown={handleKeyDown}
     >
       <div className="flex flex-col gap-3">
-        {/* Header: Status Badge */}
+        {/* Header: Status Badge and Time */}
         <div className="flex items-center justify-between gap-2">
           <Badge variant={statusVariants[task.status]} className="text-xs">
             {statusLabels[task.status]}
@@ -67,6 +67,20 @@ export function TaskCard({ task, className, onClick }: TaskCardProps) {
         <h3 className="line-clamp-2 text-sm leading-snug font-medium text-gray-900 md:text-base">
           {task.title}
         </h3>
+
+        {/* Task Type Badge (if fields exist) */}
+        {task.task_type && task.duration_days && (
+          <div className="flex items-center gap-2">
+            <Badge
+              variant={task.task_type === "single-day" ? "blue" : "purple"}
+              className="text-xs"
+            >
+              {task.task_type === "single-day"
+                ? "One-time"
+                : `${task.duration_days}-day habit`}
+            </Badge>
+          </div>
+        )}
       </div>
     </Card>
   );

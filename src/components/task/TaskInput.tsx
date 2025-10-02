@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button, Textarea, Label } from "@/components/ui";
+import { DurationSelector } from "@/components/task";
 import { useTaskStore } from "@/stores";
 import { useAuthStore } from "@/stores";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 export function TaskInput() {
   const [value, setValue] = useState("");
+  const [duration, setDuration] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -49,14 +51,21 @@ export function TaskInput() {
       return;
     }
 
+    // Validate duration
+    if (!Number.isInteger(duration) || duration < 1) {
+      setError("Duration must be a positive number");
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
 
     try {
-      const task = await createTask(trimmedValue, user.id);
+      const task = await createTask(trimmedValue, duration, user.id);
 
       if (task) {
         setValue("");
+        setDuration(1); // Reset to default
         setSuccess(true);
 
         // Hide success message after 2 seconds
@@ -86,11 +95,25 @@ export function TaskInput() {
     handleSubmit({ preventDefault: () => {} } as React.FormEvent);
   };
 
+  const taskTypeIndicator =
+    duration === 1
+      ? "📝 One-time task"
+      : `🎯 ${duration}-day habit`;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Duration Selector */}
+      <DurationSelector
+        value={duration}
+        onChange={setDuration}
+      />
+
+      {/* Divider */}
+      <div className="border-t border-gray-200" />
+
       <div className="space-y-2">
         <Label htmlFor="task-input" className="text-base font-semibold">
-          What needs to get done?
+          What do you want to accomplish?
         </Label>
 
         <Textarea
@@ -110,7 +133,7 @@ export function TaskInput() {
           )}
         />
 
-        {/* Character Counter */}
+        {/* Character Counter and Task Type Indicator */}
         <div className="flex items-center justify-between text-sm">
           <span
             className={cn(
@@ -123,10 +146,14 @@ export function TaskInput() {
             {charCount} / {maxLength} characters
           </span>
 
-          {isUnderLimit && (
+          {isUnderLimit ? (
             <span className="text-gray-500">
               {minLength - value.trim().length} more character
               {minLength - value.trim().length !== 1 ? "s" : ""} needed
+            </span>
+          ) : (
+            <span className="font-medium text-gray-600">
+              {taskTypeIndicator}
             </span>
           )}
         </div>

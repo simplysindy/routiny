@@ -3,3 +3,4 @@
 
 export { TaskInput } from "./TaskInput";
 export { TaskCard, TaskList } from "./TaskCard";
+export { DurationSelector } from "./DurationSelector";

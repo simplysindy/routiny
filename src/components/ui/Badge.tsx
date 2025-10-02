@@ -2,7 +2,7 @@ import { FC, HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface BadgeProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "pending" | "progress" | "completed";
+  variant?: "default" | "pending" | "progress" | "completed" | "blue" | "purple";
   children: ReactNode;
 }
 
@@ -17,6 +17,8 @@ export const Badge: FC<BadgeProps> = ({
     pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
     progress: "bg-blue-100 text-blue-800 border-blue-200",
     completed: "bg-green-100 text-green-800 border-green-200",
+    blue: "bg-blue-100 text-blue-700 border-blue-200",
+    purple: "bg-purple-100 text-purple-700 border-purple-200",
   };
 
   return (
