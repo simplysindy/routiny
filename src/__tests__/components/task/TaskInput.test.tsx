@@ -84,7 +84,7 @@ describe("TaskInput", () => {
     render(<TaskInput />);
 
     expect(
-      screen.getByLabelText(/what needs to get done/i)
+      screen.getByLabelText(/what do you want to accomplish/i)
     ).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText(/describe your task/i)
@@ -191,6 +191,7 @@ describe("TaskInput", () => {
     await waitFor(() => {
       expect(mockCreateTask).toHaveBeenCalledWith(
         "Clean my room",
+        1,
         "test-user-id"
       );
     });
@@ -317,5 +318,121 @@ describe("TaskInput", () => {
     await waitFor(() => {
       expect(input.value).toBe("");
     });
+  });
+
+  // Duration Integration Tests
+  it("should show duration selector", () => {
+    render(<TaskInput />);
+
+    expect(
+      screen.getByText(/how long is this task\/habit/i)
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("1 day")).toBeInTheDocument();
+  });
+
+  it("should default to 1 day duration and show one-time task indicator", () => {
+    render(<TaskInput />);
+
+    const option1Day = screen.getByLabelText("1 day");
+    expect(option1Day).toBeChecked();
+
+    // Type some text to trigger the task type indicator
+    const input = screen.getByPlaceholderText(/describe your task/i);
+    fireEvent.change(input, { target: { value: "Test task" } });
+
+    expect(screen.getByText(/📝 one-time task/i)).toBeInTheDocument();
+  });
+
+  it("should update task type indicator when duration changes", () => {
+    render(<TaskInput />);
+
+    const input = screen.getByPlaceholderText(/describe your task/i);
+    fireEvent.change(input, { target: { value: "Build a habit" } });
+
+    // Initially shows one-time task
+    expect(screen.getByText(/📝 one-time task/i)).toBeInTheDocument();
+
+    // Select 30 days
+    const option30Days = screen.getByLabelText("30 days");
+    fireEvent.click(option30Days);
+
+    // Should now show habit
+    expect(screen.getByText(/🎯 30-day habit/i)).toBeInTheDocument();
+  });
+
+  it("should pass duration to createTask action", async () => {
+    const mockTask = {
+      id: "task-id",
+      user_id: "test-user-id",
+      title: "Build a habit",
+      duration_days: 7,
+      task_type: "multi-day" as const,
+      current_day: 1,
+      ai_breakdown: [],
+      status: "pending" as const,
+      completed_at: null,
+      created_at: new Date().toISOString(),
+    };
+
+    mockCreateTask.mockResolvedValue(mockTask);
+
+    render(<TaskInput />);
+
+    // Select 7 days
+    const option7Days = screen.getByLabelText("7 days");
+    fireEvent.click(option7Days);
+
+    const input = screen.getByPlaceholderText(/describe your task/i);
+    const button = screen.getByRole("button", { name: /create task/i });
+
+    fireEvent.change(input, { target: { value: "Build a habit" } });
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(mockCreateTask).toHaveBeenCalledWith(
+        "Build a habit",
+        7,
+        "test-user-id"
+      );
+    });
+  });
+
+  it("should reset duration to 1 on successful task creation", async () => {
+    const mockTask = {
+      id: "task-id",
+      user_id: "test-user-id",
+      title: "Test task",
+      duration_days: 30,
+      task_type: "multi-day" as const,
+      current_day: 1,
+      ai_breakdown: [],
+      status: "pending" as const,
+      completed_at: null,
+      created_at: new Date().toISOString(),
+    };
+
+    mockCreateTask.mockResolvedValue(mockTask);
+
+    render(<TaskInput />);
+
+    // Select 30 days
+    const option30Days = screen.getByLabelText("30 days");
+    fireEvent.click(option30Days);
+
+    const input = screen.getByPlaceholderText(/describe your task/i);
+    const button = screen.getByRole("button", { name: /create task/i });
+
+    fireEvent.change(input, { target: { value: "Test task" } });
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/task created successfully/i)
+      ).toBeInTheDocument();
+    });
+
+    // Duration should reset to 1 day
+    const option1Day = screen.getByLabelText("1 day");
+    expect(option1Day).toBeChecked();
   });
 });
