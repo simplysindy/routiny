@@ -6,7 +6,7 @@ import type { Database } from "@/types/database";
 
 /**
  * POST /api/tasks - Create a new task
- * Note: AI breakdown integration will be added in Story 1.4
+ * Note: AI breakdown integration will be added in Stories 1.5 & 1.6
  */
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { title } = body;
+    const { title, duration_days = 1 } = body;
 
     if (!title || typeof title !== "string" || title.trim().length === 0) {
       return NextResponse.json(
@@ -48,9 +48,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate duration_days
+    if (
+      !Number.isInteger(duration_days) ||
+      duration_days < 1 ||
+      duration_days > 365
+    ) {
+      return NextResponse.json(
+        {
+          error: "Invalid duration",
+          message: "Duration must be a positive integer between 1 and 365 days",
+        },
+        { status: 400 }
+      );
+    }
+
     // Create task
     const { data, error } = await taskRepository.create(
       title.trim(),
+      duration_days,
       session.user.id
     );
 

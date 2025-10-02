@@ -9,7 +9,7 @@ interface TaskState {
 }
 
 interface TaskActions {
-  createTask: (title: string, userId: string) => Promise<Task | null>;
+  createTask: (title: string, durationDays: number, userId: string) => Promise<Task | null>;
   fetchTasks: (userId: string, limit?: number) => Promise<void>;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -24,11 +24,11 @@ export const useTaskStore = create<TaskStore>((set) => ({
   loading: false,
   error: null,
 
-  createTask: async (title: string, userId: string) => {
+  createTask: async (title: string, durationDays: number, userId: string) => {
     set({ loading: true, error: null });
 
     try {
-      const { data, error } = await taskRepository.create(title, userId);
+      const { data, error } = await taskRepository.create(title, durationDays, userId);
 
       if (error) {
         set({

@@ -6,17 +6,32 @@ import type { Database } from "../types/database";
 export class TaskService {
   /**
    * Create a new task
-   * Note: AI breakdown will be added in Story 1.4
+   * Note: AI breakdown will be added in Stories 1.5 & 1.6
    */
   static async createTask(
     title: string,
+    durationDays: number = 1,
     userId: string
   ): Promise<{ data: Task | null; error: PostgrestError | Error | null }> {
     try {
+      // Validate duration
+      if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 365) {
+        return {
+          data: null,
+          error: new Error("Duration must be a positive integer between 1 and 365 days"),
+        };
+      }
+
+      // Calculate task type based on duration
+      const taskType = durationDays === 1 ? "single-day" : "multi-day";
+
       const insertPayload: Database["public"]["Tables"]["tasks"]["Insert"] = {
         user_id: userId,
         title,
-        ai_breakdown: [], // Will be populated by AI in Story 1.4
+        duration_days: durationDays,
+        task_type: taskType,
+        current_day: 1,
+        ai_breakdown: [], // Will be populated by AI in Stories 1.5 & 1.6
         status: "pending",
       };
 
@@ -109,8 +124,8 @@ export class TaskService {
 
 // Repository functions for direct use
 export const taskRepository = {
-  create: (title: string, userId: string) =>
-    TaskService.createTask(title, userId),
+  create: (title: string, durationDays: number, userId: string) =>
+    TaskService.createTask(title, durationDays, userId),
   findByUserId: (userId: string, limit?: number) =>
     TaskService.fetchTasks(userId, limit),
   findById: (taskId: string) => TaskService.getTaskById(taskId),

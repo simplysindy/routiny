@@ -17,11 +17,18 @@ export interface UserPreferences {
   theme: "light" | "dark" | "auto";
 }
 
+export interface MultiDayBreakdown {
+  [key: string]: string[]; // e.g., { "day_1": ["task1", "task2"], "day_2": [...] }
+}
+
 export interface Task {
   id: string;
   user_id: string;
   title: string;
-  ai_breakdown: string[];
+  duration_days: number;
+  task_type: "single-day" | "multi-day";
+  current_day: number;
+  ai_breakdown: string[] | MultiDayBreakdown;
   status: "pending" | "in_progress" | "completed";
   completed_at: string | null;
   created_at: string;
