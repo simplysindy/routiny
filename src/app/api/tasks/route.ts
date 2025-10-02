@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { config as appConfig } from "@/lib/config";
-import { taskRepository } from "@/services";
 import { generateSingleDayBreakdown } from "@/services/openrouterService";
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { getLangfuse } from "@/lib/langfuse";
@@ -117,18 +116,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create task with AI breakdown
+    // Create task with AI breakdown using server Supabase client
     console.log(
       "Creating task in database with breakdown:",
       aiBreakdown.length,
       "steps"
     );
-    const { data, error } = await taskRepository.create(
-      title.trim(),
-      duration_days,
-      session.user.id,
-      aiBreakdown
-    );
+
+    const taskType = duration_days === 1 ? "single-day" : "multi-day";
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert({
+        user_id: session.user.id,
+        title: title.trim(),
+        duration_days,
+        task_type: taskType,
+        current_day: 1,
+        ai_breakdown: aiBreakdown,
+        status: "pending",
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error("Error creating task in database:", error);
@@ -188,11 +197,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "5", 10);
 
-    // Fetch tasks
-    const { data, error } = await taskRepository.findByUserId(
-      session.user.id,
-      limit
-    );
+    // Fetch tasks using server Supabase client
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
     if (error) {
       console.error("Error fetching tasks:", error);
