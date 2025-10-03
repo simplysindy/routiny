@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { config as appConfig, validateOpenRouterConfig } from "@/lib/config";
-import { generateSingleDayBreakdown } from "@/services/openrouterService";
+import {
+  generateSingleDayBreakdown,
+  generateMultiDayBreakdown,
+  generateMultiDayFallbackBreakdown,
+} from "@/services/openrouterService";
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { getLangfuse } from "@/lib/langfuse";
 import type { Database } from "@/types/database";
+import type { MultiDayBreakdown } from "@/types";
 
 /**
  * POST /api/tasks - Create a new task
  * Story 1.5: AI breakdown integration for single-day tasks with OpenRouter
+ * Story 1.6: AI breakdown integration for multi-day tasks with OpenRouter
  */
 export async function POST(request: NextRequest) {
   try {
@@ -67,89 +73,114 @@ export async function POST(request: NextRequest) {
 
     // Calculate task type
     const taskType = duration_days === 1 ? "single-day" : "multi-day";
-    let aiBreakdown: string[] = [];
+    let aiBreakdown: string[] | MultiDayBreakdown = [];
 
-    // Generate AI breakdown for single-day tasks
-    if (taskType === "single-day") {
-      // Validate OpenRouter configuration
-      try {
-        validateOpenRouterConfig();
-      } catch (error) {
-        console.error("OpenRouter configuration error:", error);
-        return NextResponse.json(
-          {
-            error: "Configuration error",
-            message:
-              error instanceof Error
-                ? error.message
-                : "AI breakdown feature is not configured",
-          },
-          { status: 503 }
-        );
-      }
+    // Generate AI breakdown for all tasks (single-day and multi-day)
+    // Validate OpenRouter configuration
+    try {
+      validateOpenRouterConfig();
+    } catch (error) {
+      console.error("OpenRouter configuration error:", error);
+      return NextResponse.json(
+        {
+          error: "Configuration error",
+          message:
+            error instanceof Error
+              ? error.message
+              : "AI breakdown feature is not configured",
+        },
+        { status: 503 }
+      );
+    }
 
-      // Check rate limit
-      const rateLimit = await checkRateLimit(session.user.id);
+    // Check rate limit
+    const rateLimit = await checkRateLimit(session.user.id);
 
-      if (!rateLimit.allowed) {
-        // Log rate limit denial to Langfuse
-        const langfuse = getLangfuse();
-        langfuse?.event({
-          name: "rate-limit-denied",
-          metadata: {
-            userId: session.user.id,
-            allowed: false,
-            retryAfter: rateLimit.retryAfter,
-            taskTitle: title.trim(),
-          },
-        });
-
-        return NextResponse.json(
-          {
-            error: "Rate limit exceeded",
-            message:
-              "You've reached the hourly limit for AI breakdowns. Please try again later.",
-            retryAfter: rateLimit.retryAfter,
-          },
-          {
-            status: 429,
-            headers: {
-              "Retry-After": String(rateLimit.retryAfter || 3600),
-            },
-          }
-        );
-      }
-
-      // Log rate limit event to Langfuse
+    if (!rateLimit.allowed) {
+      // Log rate limit denial to Langfuse
       const langfuse = getLangfuse();
       langfuse?.event({
-        name: "rate-limit-check",
+        name: "rate-limit-denied",
         metadata: {
           userId: session.user.id,
-          allowed: true,
+          allowed: false,
+          retryAfter: rateLimit.retryAfter,
           taskTitle: title.trim(),
         },
       });
 
-      // Generate AI breakdown
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          message:
+            "You've reached the hourly limit for AI breakdowns. Please try again later.",
+          retryAfter: rateLimit.retryAfter,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfter || 3600),
+          },
+        }
+      );
+    }
+
+    // Log rate limit event to Langfuse
+    const langfuse = getLangfuse();
+    langfuse?.event({
+      name: "rate-limit-check",
+      metadata: {
+        userId: session.user.id,
+        allowed: true,
+        taskTitle: title.trim(),
+      },
+    });
+
+    // Generate AI breakdown based on task type
+    if (taskType === "single-day") {
       try {
-        console.log("Calling OpenRouter for task:", title.trim());
+        console.log("Calling OpenRouter for single-day task:", title.trim());
         aiBreakdown = await generateSingleDayBreakdown(
           title.trim(),
           session.user.id
         );
         console.log("OpenRouter returned breakdown:", aiBreakdown);
       } catch (error) {
-        console.error("Error generating AI breakdown:", error);
+        console.error("Error generating single-day AI breakdown:", error);
         // Continue with empty breakdown - fallback is handled in service
+      }
+    } else if (taskType === "multi-day") {
+      try {
+        console.log(
+          `Calling OpenRouter for multi-day task (${duration_days} days):`,
+          title.trim()
+        );
+        aiBreakdown = await generateMultiDayBreakdown(
+          title.trim(),
+          duration_days,
+          session.user.id
+        );
+        console.log(
+          "OpenRouter returned multi-day breakdown:",
+          Object.keys(aiBreakdown).length,
+          "days"
+        );
+      } catch (error) {
+        console.error("Error generating multi-day AI breakdown:", error);
+        // Use fallback breakdown on error
+        aiBreakdown = generateMultiDayFallbackBreakdown(
+          title.trim(),
+          duration_days
+        );
       }
     }
 
     // Create task with AI breakdown using server Supabase client
     console.log(
       "Creating task in database with breakdown:",
-      aiBreakdown.length,
-      "steps"
+      taskType === "single-day"
+        ? `${(aiBreakdown as string[]).length} steps`
+        : `${Object.keys(aiBreakdown).length} days`
     );
 
     const { data, error } = await supabase

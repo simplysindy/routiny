@@ -27,6 +27,8 @@ vi.mock("@supabase/ssr", () => ({
 
 vi.mock("@/services/openrouterService", () => ({
   generateSingleDayBreakdown: vi.fn(),
+  generateMultiDayBreakdown: vi.fn(),
+  generateMultiDayFallbackBreakdown: vi.fn(),
 }));
 
 vi.mock("@/lib/rateLimiter", () => ({
@@ -51,7 +53,11 @@ vi.mock("@/lib/config", () => ({
 }));
 
 import { createServerClient } from "@supabase/ssr";
-import { generateSingleDayBreakdown } from "@/services/openrouterService";
+import {
+  generateSingleDayBreakdown,
+  generateMultiDayBreakdown,
+  generateMultiDayFallbackBreakdown,
+} from "@/services/openrouterService";
 import { checkRateLimit } from "@/lib/rateLimiter";
 
 describe("POST /api/tasks - AI Breakdown Integration", () => {
@@ -247,19 +253,146 @@ describe("POST /api/tasks - AI Breakdown Integration", () => {
     expect(data.data.ai_breakdown[1]).toContain("Start working on:");
   });
 
-  it("should not generate AI breakdown for multi-day tasks", async () => {
+  it("should create multi-day task with AI breakdown", async () => {
     const mockSession = {
       user: { id: "user-123", email: "test@example.com" },
+    };
+
+    const mockMultiDayBreakdown = {
+      day_1: ["Put on running shoes", "Walk for 2 minutes"],
+      day_2: ["Put on running shoes", "Jog for 1 minute"],
+      day_3: ["Jog for 2 minutes", "Cool down"],
+      day_4: ["Jog for 5 minutes", "Stretch"],
+      day_5: ["Jog for 7 minutes", "Cool down"],
+      day_6: ["Jog for 10 minutes", "Stretch"],
+      day_7: ["Jog for 12 minutes", "Reflect on progress"],
     };
 
     const mockTaskData = {
       id: "task-123",
       user_id: "user-123",
-      title: "Exercise daily",
+      title: "Build running habit",
       duration_days: 7,
       task_type: "multi-day",
       current_day: 1,
-      ai_breakdown: [],
+      ai_breakdown: mockMultiDayBreakdown,
+      status: "pending",
+      completed_at: null,
+      created_at: new Date().toISOString(),
+    };
+
+    const mockSingle = vi
+      .fn()
+      .mockResolvedValue({ data: mockTaskData, error: null });
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
+    const mockFrom = vi.fn().mockReturnValue({ insert: mockInsert });
+
+    const mockSupabaseClient = {
+      auth: {
+        getSession: vi
+          .fn()
+          .mockResolvedValue({ data: { session: mockSession } }),
+      },
+      from: mockFrom,
+    };
+
+    vi.mocked(createServerClient).mockReturnValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockSupabaseClient as any
+    );
+
+    vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true });
+
+    vi.mocked(generateMultiDayBreakdown).mockResolvedValue(
+      mockMultiDayBreakdown
+    );
+
+    const mockRequest = {
+      json: async () => ({ title: "Build running habit", duration_days: 7 }),
+      cookies: {
+        getAll: () => [],
+        set: vi.fn(),
+      },
+    } as unknown as NextRequest;
+
+    const response = await POST(mockRequest);
+    const data = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(data.data.task_type).toBe("multi-day");
+    expect(data.data.ai_breakdown).toBeInstanceOf(Object);
+    expect(Object.keys(data.data.ai_breakdown)).toHaveLength(7);
+    expect(generateSingleDayBreakdown).not.toHaveBeenCalled();
+    expect(generateMultiDayBreakdown).toHaveBeenCalledWith(
+      "Build running habit",
+      7,
+      "user-123"
+    );
+  });
+
+  it("should use fallback for multi-day on OpenRouter failure", async () => {
+    const mockSession = {
+      user: { id: "user-123", email: "test@example.com" },
+    };
+
+    vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true });
+
+    const mockFallbackBreakdown = {
+      day_1: [
+        "Prepare for: Test habit",
+        "Practice day 1 of 7",
+        "Reflect on progress",
+      ],
+      day_2: [
+        "Prepare for: Test habit",
+        "Practice day 2 of 7",
+        "Reflect on progress",
+      ],
+      day_3: [
+        "Prepare for: Test habit",
+        "Practice day 3 of 7",
+        "Reflect on progress",
+      ],
+      day_4: [
+        "Prepare for: Test habit",
+        "Practice day 4 of 7",
+        "Reflect on progress",
+      ],
+      day_5: [
+        "Prepare for: Test habit",
+        "Practice day 5 of 7",
+        "Reflect on progress",
+      ],
+      day_6: [
+        "Prepare for: Test habit",
+        "Practice day 6 of 7",
+        "Reflect on progress",
+      ],
+      day_7: [
+        "Prepare for: Test habit",
+        "Practice day 7 of 7",
+        "Reflect on progress",
+      ],
+    };
+
+    // Mock OpenRouter failure
+    vi.mocked(generateMultiDayBreakdown).mockRejectedValue(
+      new Error("API Error")
+    );
+
+    vi.mocked(generateMultiDayFallbackBreakdown).mockReturnValue(
+      mockFallbackBreakdown
+    );
+
+    const mockTaskData = {
+      id: "task-123",
+      user_id: "user-123",
+      title: "Test habit",
+      duration_days: 7,
+      task_type: "multi-day",
+      current_day: 1,
+      ai_breakdown: mockFallbackBreakdown,
       status: "pending",
       completed_at: null,
       created_at: new Date().toISOString(),
@@ -287,7 +420,7 @@ describe("POST /api/tasks - AI Breakdown Integration", () => {
     );
 
     const mockRequest = {
-      json: async () => ({ title: "Exercise daily", duration_days: 7 }),
+      json: async () => ({ title: "Test habit", duration_days: 7 }),
       cookies: {
         getAll: () => [],
         set: vi.fn(),
@@ -299,7 +432,87 @@ describe("POST /api/tasks - AI Breakdown Integration", () => {
 
     expect(response.status).toBe(201);
     expect(data.data.task_type).toBe("multi-day");
-    expect(generateSingleDayBreakdown).not.toHaveBeenCalled();
+    expect(data.data.ai_breakdown).toBeInstanceOf(Object);
+    expect(Object.keys(data.data.ai_breakdown)).toHaveLength(7);
+    expect(generateMultiDayFallbackBreakdown).toHaveBeenCalledWith(
+      "Test habit",
+      7
+    );
+  });
+
+  it("should handle 30-day multi-day breakdown", async () => {
+    const mockSession = {
+      user: { id: "user-123", email: "test@example.com" },
+    };
+
+    const mock30DayBreakdown: Record<string, string[]> = {};
+    for (let i = 1; i <= 30; i++) {
+      mock30DayBreakdown[`day_${i}`] = [
+        `Task 1 for day ${i}`,
+        `Task 2 for day ${i}`,
+      ];
+    }
+
+    const mockTaskData = {
+      id: "task-123",
+      user_id: "user-123",
+      title: "Meditation practice",
+      duration_days: 30,
+      task_type: "multi-day",
+      current_day: 1,
+      ai_breakdown: mock30DayBreakdown,
+      status: "pending",
+      completed_at: null,
+      created_at: new Date().toISOString(),
+    };
+
+    const mockSingle = vi
+      .fn()
+      .mockResolvedValue({ data: mockTaskData, error: null });
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
+    const mockFrom = vi.fn().mockReturnValue({ insert: mockInsert });
+
+    const mockSupabaseClient = {
+      auth: {
+        getSession: vi
+          .fn()
+          .mockResolvedValue({ data: { session: mockSession } }),
+      },
+      from: mockFrom,
+    };
+
+    vi.mocked(createServerClient).mockReturnValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockSupabaseClient as any
+    );
+
+    vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true });
+
+    vi.mocked(generateMultiDayBreakdown).mockResolvedValue(mock30DayBreakdown);
+
+    const mockRequest = {
+      json: async () => ({
+        title: "Meditation practice",
+        duration_days: 30,
+      }),
+      cookies: {
+        getAll: () => [],
+        set: vi.fn(),
+      },
+    } as unknown as NextRequest;
+
+    const response = await POST(mockRequest);
+    const data = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(data.data.task_type).toBe("multi-day");
+    expect(Object.keys(data.data.ai_breakdown)).toHaveLength(30);
+    expect(generateMultiDayBreakdown).toHaveBeenCalledWith(
+      "Meditation practice",
+      30,
+      "user-123"
+    );
   });
 
   it("should require authentication", async () => {
