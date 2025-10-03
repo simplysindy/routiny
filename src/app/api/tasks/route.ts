@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import {
-  config as appConfig,
-  validateOpenRouterConfig,
-} from "@/lib/config";
+import { config as appConfig, validateOpenRouterConfig } from "@/lib/config";
 import { generateSingleDayBreakdown } from "@/services/openrouterService";
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { getLangfuse } from "@/lib/langfuse";
