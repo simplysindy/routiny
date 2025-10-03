@@ -95,6 +95,18 @@ export async function POST(request: NextRequest) {
       const rateLimit = await checkRateLimit(session.user.id);
 
       if (!rateLimit.allowed) {
+        // Log rate limit denial to Langfuse
+        const langfuse = getLangfuse();
+        langfuse?.event({
+          name: "rate-limit-denied",
+          metadata: {
+            userId: session.user.id,
+            allowed: false,
+            retryAfter: rateLimit.retryAfter,
+            taskTitle: title.trim(),
+          },
+        });
+
         return NextResponse.json(
           {
             error: "Rate limit exceeded",
