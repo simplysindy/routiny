@@ -142,7 +142,9 @@ describe("MultiDayTaskDisplay", () => {
   });
 
   it("should call onStepComplete with correct day and stepIndex", async () => {
-    const handleStepComplete = vi.fn().mockResolvedValue(undefined);
+    const handleStepComplete = vi
+      .fn<(stepIndex: number, day: number) => Promise<void>>()
+      .mockResolvedValue(undefined);
     render(
       <MultiDayTaskDisplay
         task={mockTask}
@@ -221,7 +223,9 @@ describe("MultiDayTaskDisplay", () => {
   });
 
   it("should not allow unchecking completed tasks", async () => {
-    const handleStepComplete = vi.fn().mockResolvedValue(undefined);
+    const handleStepComplete = vi
+      .fn<(stepIndex: number, day: number) => Promise<void>>()
+      .mockResolvedValue(undefined);
     const taskWithCompleted: Task = {
       ...mockTask,
       ai_breakdown: {
@@ -248,9 +252,9 @@ describe("MultiDayTaskDisplay", () => {
   });
 
   it("should show loading spinner when task is being completed", async () => {
-    const handleStepComplete = vi.fn(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
-    );
+    const handleStepComplete = vi.fn<
+      (stepIndex: number, day: number) => Promise<void>
+    >(() => new Promise<void>((resolve) => setTimeout(resolve, 100)));
     render(
       <MultiDayTaskDisplay
         task={mockTask}

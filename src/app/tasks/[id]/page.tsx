@@ -4,17 +4,50 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { config as appConfig } from "@/lib/config";
 import type { Database } from "@/types/database";
+import type { BreakdownStep, MultiDayBreakdown, Task } from "@/types";
 import TaskDetailWrapper from "./TaskDetailWrapper";
-
 interface TaskDetailPageProps {
   params: {
     id: string;
   };
 }
 
+function normalizeTask(
+  task: Database["public"]["Tables"]["tasks"]["Row"]
+): Task {
+  const taskType = task.task_type === "multi-day" ? "multi-day" : "single-day";
+
+  const rawBreakdown = task.ai_breakdown;
+
+  let aiBreakdown: Task["ai_breakdown"];
+  if (taskType === "single-day") {
+    aiBreakdown = Array.isArray(rawBreakdown)
+      ? (rawBreakdown as string[] | BreakdownStep[])
+      : ([] as BreakdownStep[]);
+  } else {
+    aiBreakdown =
+      rawBreakdown && !Array.isArray(rawBreakdown)
+        ? (rawBreakdown as MultiDayBreakdown)
+        : ({} as MultiDayBreakdown);
+  }
+
+  return {
+    id: task.id,
+    user_id: task.user_id,
+    title: task.title,
+    duration_days: task.duration_days ?? 1,
+    task_type: taskType,
+    current_day: task.current_day ?? 1,
+    ai_breakdown: aiBreakdown,
+    status: task.status as Task["status"],
+    completed_at: task.completed_at,
+    created_at: task.created_at,
+  };
+}
+
 export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   // Create Supabase client for server component
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createServerClient<Database>(
     appConfig.supabase.url,
     appConfig.supabase.anonKey,
@@ -23,9 +56,17 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookies) {
-          cookies.forEach(({ name, value, options }) => {
-            cookieStore.set({ name, value, ...options });
+        setAll(cookiesToSet) {
+          const mutableCookies = cookieStore as unknown as {
+            set: (cookie: {
+              name: string;
+              value: string;
+              options?: Record<string, unknown>;
+            }) => void;
+          };
+
+          cookiesToSet.forEach(({ name, value, options }) => {
+            mutableCookies.set({ name, value, options });
           });
         },
       },
@@ -77,7 +118,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-4xl px-4 py-6 md:py-8">
-        <TaskDetailWrapper task={task} />
+        <TaskDetailWrapper task={normalizeTask(task)} />
       </div>
     </div>
   );

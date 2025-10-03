@@ -8,7 +8,7 @@ import {
 } from "@/services/openrouterService";
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { getLangfuse } from "@/lib/langfuse";
-import type { Database } from "@/types/database";
+import type { Database, Json } from "@/types/database";
 import type { MultiDayBreakdown } from "@/types";
 
 /**
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
         duration_days,
         task_type: taskType,
         current_day: 1,
-        ai_breakdown: aiBreakdown,
+        ai_breakdown: aiBreakdown as unknown as Json,
         status: "pending",
       })
       .select()

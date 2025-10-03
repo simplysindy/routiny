@@ -47,7 +47,8 @@ describe("POST /api/tasks/[id]/complete-step", () => {
       },
     };
 
-    const { createServerClient } = await import("@supabase/ssr");
+    const supabaseModule = await import("@supabase/ssr");
+    const createServerClient = vi.mocked(supabaseModule.createServerClient);
     mockSupabase = {
       auth: {
         getSession: vi
@@ -61,7 +62,11 @@ describe("POST /api/tasks/[id]/complete-step", () => {
       update: vi.fn().mockReturnThis(),
     };
 
-    createServerClient.mockReturnValue(mockSupabase);
+    createServerClient.mockReturnValue(
+      mockSupabase as unknown as ReturnType<
+        (typeof supabaseModule)["createServerClient"]
+      >
+    );
   });
 
   it("should mark single-day step as complete", async () => {
@@ -106,7 +111,8 @@ describe("POST /api/tasks/[id]/complete-step", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.ai_breakdown[0].completed).toBe(true);
+    const singleDayBreakdown = data.data.ai_breakdown as BreakdownStep[];
+    expect(singleDayBreakdown[0].completed).toBe(true);
     expect(data.data.status).toBe("in_progress");
   });
 
@@ -158,9 +164,8 @@ describe("POST /api/tasks/[id]/complete-step", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(
-      (data.data.ai_breakdown as MultiDayBreakdown).day_1[0].completed
-    ).toBe(true);
+    const multiDayBreakdown = data.data.ai_breakdown as MultiDayBreakdown;
+    expect((multiDayBreakdown.day_1[0] as BreakdownStep).completed).toBe(true);
     expect(data.data.status).toBe("in_progress");
   });
 
@@ -250,7 +255,8 @@ describe("POST /api/tasks/[id]/complete-step", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.ai_breakdown[0]).toEqual({
+    const legacyBreakdown = data.data.ai_breakdown as BreakdownStep[];
+    expect(legacyBreakdown[0]).toEqual({
       text: "Step 1",
       completed: true,
     });

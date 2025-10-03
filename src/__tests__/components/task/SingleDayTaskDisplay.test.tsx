@@ -69,7 +69,9 @@ describe("SingleDayTaskDisplay", () => {
   });
 
   it("should call onStepComplete when checkbox is clicked", async () => {
-    const handleStepComplete = vi.fn().mockResolvedValue(undefined);
+    const handleStepComplete = vi
+      .fn<(stepIndex: number) => Promise<void>>()
+      .mockResolvedValue(undefined);
     render(
       <SingleDayTaskDisplay
         task={mockTask}
@@ -86,7 +88,9 @@ describe("SingleDayTaskDisplay", () => {
   });
 
   it("should not allow unchecking completed steps", async () => {
-    const handleStepComplete = vi.fn().mockResolvedValue(undefined);
+    const handleStepComplete = vi
+      .fn<(stepIndex: number) => Promise<void>>()
+      .mockResolvedValue(undefined);
     const taskWithCompleted: Task = {
       ...mockTask,
       ai_breakdown: [
@@ -147,8 +151,8 @@ describe("SingleDayTaskDisplay", () => {
   });
 
   it("should show loading spinner when step is being completed", async () => {
-    const handleStepComplete = vi.fn(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
+    const handleStepComplete = vi.fn<(stepIndex: number) => Promise<void>>(
+      () => new Promise<void>((resolve) => setTimeout(resolve, 100))
     );
     render(
       <SingleDayTaskDisplay
@@ -168,8 +172,8 @@ describe("SingleDayTaskDisplay", () => {
   });
 
   it("should disable checkbox while loading", async () => {
-    const handleStepComplete = vi.fn(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
+    const handleStepComplete = vi.fn<(stepIndex: number) => Promise<void>>(
+      () => new Promise<void>((resolve) => setTimeout(resolve, 100))
     );
     render(
       <SingleDayTaskDisplay

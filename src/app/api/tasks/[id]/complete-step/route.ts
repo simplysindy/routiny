@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { config as appConfig } from "@/lib/config";
-import type { Database } from "@/types/database";
+import type { Database, Json } from "@/types/database";
 import type { BreakdownStep, MultiDayBreakdown } from "@/types";
 
 /**
@@ -167,10 +167,31 @@ export async function POST(
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
-    // Validate stepIndex bounds
-    const breakdown = task.ai_breakdown;
-    if (task.task_type === "single-day") {
-      const steps = Array.isArray(breakdown) ? breakdown : [];
+    const taskType =
+      task.task_type === "single-day" || task.task_type === "multi-day"
+        ? task.task_type
+        : null;
+
+    if (!taskType) {
+      return NextResponse.json({ error: "Invalid task type" }, { status: 400 });
+    }
+
+    const rawBreakdown = task.ai_breakdown;
+
+    let breakdownValue: string[] | BreakdownStep[] | MultiDayBreakdown;
+    if (taskType === "single-day") {
+      breakdownValue = Array.isArray(rawBreakdown)
+        ? (rawBreakdown as string[] | BreakdownStep[])
+        : ([] as BreakdownStep[]);
+    } else {
+      breakdownValue =
+        rawBreakdown && !Array.isArray(rawBreakdown)
+          ? (rawBreakdown as MultiDayBreakdown)
+          : ({} as MultiDayBreakdown);
+    }
+
+    if (taskType === "single-day") {
+      const steps = breakdownValue as (string | BreakdownStep)[];
       if (stepIndex >= steps.length) {
         return NextResponse.json(
           { error: "Invalid stepIndex" },
@@ -179,7 +200,7 @@ export async function POST(
       }
     } else {
       const dayKey = `day_${day || 1}`;
-      const multiBreakdown = breakdown as MultiDayBreakdown;
+      const multiBreakdown = breakdownValue as MultiDayBreakdown;
       const dayTasks = multiBreakdown[dayKey];
 
       if (
@@ -196,16 +217,16 @@ export async function POST(
 
     // Update ai_breakdown with completion flag
     const updatedBreakdown = updateBreakdownCompletion(
-      task.ai_breakdown,
+      breakdownValue,
       stepIndex,
       day,
-      task.task_type
+      taskType
     );
 
     // Calculate new status
-    const allComplete = checkAllComplete(updatedBreakdown, task.task_type);
+    const allComplete = checkAllComplete(updatedBreakdown, taskType);
     const hasAnyComplete =
-      task.task_type === "single-day"
+      taskType === "single-day"
         ? Array.isArray(updatedBreakdown) &&
           updatedBreakdown.some(
             (step) =>
@@ -217,10 +238,10 @@ export async function POST(
             (dayTasks) =>
               Array.isArray(dayTasks) &&
               dayTasks.some(
-                (task) =>
-                  typeof task === "object" &&
-                  "completed" in task &&
-                  task.completed === true
+                (taskItem) =>
+                  typeof taskItem === "object" &&
+                  "completed" in taskItem &&
+                  taskItem.completed === true
               )
           );
 
@@ -234,7 +255,7 @@ export async function POST(
     const { data: updatedTask, error: updateError } = await supabase
       .from("tasks")
       .update({
-        ai_breakdown: updatedBreakdown,
+        ai_breakdown: updatedBreakdown as unknown as Json,
         status: newStatus,
         completed_at: allComplete ? new Date().toISOString() : null,
       })
