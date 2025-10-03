@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { config as appConfig } from "@/lib/config";
+import {
+  config as appConfig,
+  validateOpenRouterConfig,
+} from "@/lib/config";
 import { generateSingleDayBreakdown } from "@/services/openrouterService";
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { getLangfuse } from "@/lib/langfuse";
@@ -71,6 +74,23 @@ export async function POST(request: NextRequest) {
 
     // Generate AI breakdown for single-day tasks
     if (taskType === "single-day") {
+      // Validate OpenRouter configuration
+      try {
+        validateOpenRouterConfig();
+      } catch (error) {
+        console.error("OpenRouter configuration error:", error);
+        return NextResponse.json(
+          {
+            error: "Configuration error",
+            message:
+              error instanceof Error
+                ? error.message
+                : "AI breakdown feature is not configured",
+          },
+          { status: 503 }
+        );
+      }
+
       // Check rate limit
       const rateLimit = await checkRateLimit(session.user.id);
 

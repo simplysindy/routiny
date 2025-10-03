@@ -134,3 +134,17 @@ export function validateConfig(): boolean {
     return false;
   }
 }
+
+/**
+ * Validate critical feature-specific configuration
+ * Validates OpenRouter API key for AI breakdown functionality
+ * @throws Error if required configuration is missing
+ */
+export function validateOpenRouterConfig(): void {
+  if (!config.openRouter.apiKey) {
+    throw new Error(
+      "OPENROUTER_API_KEY environment variable is required for AI task breakdown functionality. " +
+        "Please set this variable in your .env.local file."
+    );
+  }
+}

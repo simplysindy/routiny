@@ -43,7 +43,11 @@ vi.mock("@/lib/config", () => ({
       url: "https://test.supabase.co",
       anonKey: "test-anon-key",
     },
+    openRouter: {
+      apiKey: "test-api-key",
+    },
   },
+  validateOpenRouterConfig: vi.fn(), // Mock the validation function
 }));
 
 import { createServerClient } from "@supabase/ssr";
