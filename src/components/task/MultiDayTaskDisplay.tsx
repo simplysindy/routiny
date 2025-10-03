@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { FC, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Task, BreakdownStep, MultiDayBreakdown } from '@/types';
-import ProgressBar from '@/components/ui/ProgressBar';
-import { Button } from '@/components/ui/Button';
+import { FC, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Task, BreakdownStep, MultiDayBreakdown } from "@/types";
+import ProgressBar from "@/components/ui/ProgressBar";
+import { Button } from "@/components/ui/Button";
 
 interface MultiDayTaskDisplayProps {
   task: Task;
@@ -32,16 +32,16 @@ const MultiDayTaskDisplay: FC<MultiDayTaskDisplayProps> = ({
     }
 
     return dayTasks.map((task) =>
-      typeof task === 'string' ? { text: task, completed: false } : task
+      typeof task === "string" ? { text: task, completed: false } : task
     );
   };
 
   // Get all day keys sorted
   const dayKeys = Object.keys(breakdown)
-    .filter((key) => key.startsWith('day_'))
+    .filter((key) => key.startsWith("day_"))
     .sort((a, b) => {
-      const dayA = parseInt(a.split('_')[1]);
-      const dayB = parseInt(b.split('_')[1]);
+      const dayA = parseInt(a.split("_")[1]);
+      const dayB = parseInt(b.split("_")[1]);
       return dayA - dayB;
     });
 
@@ -110,15 +110,16 @@ const MultiDayTaskDisplay: FC<MultiDayTaskDisplayProps> = ({
       <div
         key={dayKey}
         className={cn(
-          'p-4 rounded-lg border transition-all duration-300',
+          "rounded-lg border p-4 transition-all duration-300",
           isCurrentDay
-            ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200'
-            : 'bg-white border-gray-200'
+            ? "border-blue-300 bg-blue-50 ring-2 ring-blue-200"
+            : "border-gray-200 bg-white"
         )}
       >
-        <div className="flex justify-between items-center mb-3">
+        <div className="mb-3 flex items-center justify-between">
           <h3 className="font-semibold text-gray-900">
-            Day {day} {isCurrentDay && <span className="text-blue-600">(Current)</span>}
+            Day {day}{" "}
+            {isCurrentDay && <span className="text-blue-600">(Current)</span>}
           </h3>
           <span className="text-sm text-gray-500">
             {tasks.filter((t) => t.completed).length}/{tasks.length} completed
@@ -132,10 +133,10 @@ const MultiDayTaskDisplay: FC<MultiDayTaskDisplayProps> = ({
               <div
                 key={index}
                 className={cn(
-                  'flex items-start gap-3 p-3 rounded border transition-all duration-200',
+                  "flex items-start gap-3 rounded border p-3 transition-all duration-200",
                   task.completed
-                    ? 'bg-green-50 border-green-200'
-                    : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                    ? "border-green-200 bg-green-50"
+                    : "border-gray-200 bg-gray-50 hover:border-gray-300"
                 )}
               >
                 <input
@@ -144,24 +145,28 @@ const MultiDayTaskDisplay: FC<MultiDayTaskDisplayProps> = ({
                   onChange={() => handleCheckboxChange(index, day)}
                   disabled={task.completed || loadingSteps.has(loadingKey)}
                   className={cn(
-                    'mt-0.5 h-5 w-5 rounded border-gray-300 text-green-600',
-                    'focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
-                    'transition-all duration-200 cursor-pointer',
-                    'disabled:cursor-not-allowed disabled:opacity-60'
+                    "mt-0.5 h-5 w-5 rounded border-gray-300 text-green-600",
+                    "focus:ring-2 focus:ring-green-500 focus:ring-offset-2",
+                    "cursor-pointer transition-all duration-200",
+                    "disabled:cursor-not-allowed disabled:opacity-60"
                   )}
                   aria-label={`Day ${day}, Task ${index + 1}: ${task.text}`}
                 />
                 <label
                   className={cn(
-                    'flex-1 text-sm cursor-pointer select-none transition-all duration-200',
-                    task.completed ? 'line-through text-gray-500' : 'text-gray-900'
+                    "flex-1 cursor-pointer text-sm transition-all duration-200 select-none",
+                    task.completed
+                      ? "text-gray-500 line-through"
+                      : "text-gray-900"
                   )}
-                  onClick={() => !task.completed && handleCheckboxChange(index, day)}
+                  onClick={() =>
+                    !task.completed && handleCheckboxChange(index, day)
+                  }
                 >
                   {task.text}
                 </label>
                 {loadingSteps.has(loadingKey) && (
-                  <div className="animate-spin h-5 w-5 border-2 border-green-500 border-t-transparent rounded-full" />
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-green-500 border-t-transparent" />
                 )}
               </div>
             );
@@ -172,10 +177,12 @@ const MultiDayTaskDisplay: FC<MultiDayTaskDisplayProps> = ({
   };
 
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn("space-y-6", className)}>
       {/* Task Header */}
       <div className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{task.title}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
+          {task.title}
+        </h1>
         <p className="text-sm text-gray-500">
           {totalDays}-day habit • Day {task.current_day} of {totalDays}
         </p>
@@ -189,19 +196,19 @@ const MultiDayTaskDisplay: FC<MultiDayTaskDisplayProps> = ({
       />
 
       {/* View Toggle */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setViewAllDays(!viewAllDays)}
         >
-          {viewAllDays ? 'View Current Day' : 'View All Days'}
+          {viewAllDays ? "View Current Day" : "View All Days"}
         </Button>
       </div>
 
       {/* Day Navigation (when not viewing all days) */}
       {!viewAllDays && (
-        <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+        <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
           <Button
             variant="outline"
             size="sm"
@@ -237,22 +244,20 @@ const MultiDayTaskDisplay: FC<MultiDayTaskDisplayProps> = ({
 
       {/* Tasks Display */}
       <div className="space-y-4">
-        {viewAllDays ? (
-          // Show all days
-          dayKeys.map((dayKey) => {
-            const day = parseInt(dayKey.split('_')[1]);
-            return renderDayTasks(day);
-          })
-        ) : (
-          // Show current day only
-          renderDayTasks(currentDayView)
-        )}
+        {viewAllDays
+          ? // Show all days
+            dayKeys.map((dayKey) => {
+              const day = parseInt(dayKey.split("_")[1]);
+              return renderDayTasks(day);
+            })
+          : // Show current day only
+            renderDayTasks(currentDayView)}
       </div>
 
       {/* Celebration Message */}
       {completedTasks === totalTasks && totalTasks > 0 && (
-        <div className="p-4 bg-green-100 border border-green-300 rounded-lg text-center animate-pulse">
-          <p className="text-green-800 font-semibold">
+        <div className="animate-pulse rounded-lg border border-green-300 bg-green-100 p-4 text-center">
+          <p className="font-semibold text-green-800">
             🎉 Amazing! You&apos;ve completed all {totalDays} days!
           </p>
         </div>

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { FC, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Task, BreakdownStep } from '@/types';
-import ProgressBar from '@/components/ui/ProgressBar';
+import { FC, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Task, BreakdownStep } from "@/types";
+import ProgressBar from "@/components/ui/ProgressBar";
 
 interface SingleDayTaskDisplayProps {
   task: Task;
@@ -25,7 +25,7 @@ const SingleDayTaskDisplay: FC<SingleDayTaskDisplayProps> = ({
     }
 
     return task.ai_breakdown.map((step) =>
-      typeof step === 'string' ? { text: step, completed: false } : step
+      typeof step === "string" ? { text: step, completed: false } : step
     );
   };
 
@@ -52,10 +52,12 @@ const SingleDayTaskDisplay: FC<SingleDayTaskDisplayProps> = ({
   };
 
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn("space-y-6", className)}>
       {/* Task Header */}
       <div className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{task.title}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
+          {task.title}
+        </h1>
         <p className="text-sm text-gray-500">Single-day task</p>
       </div>
 
@@ -72,10 +74,10 @@ const SingleDayTaskDisplay: FC<SingleDayTaskDisplayProps> = ({
           <div
             key={index}
             className={cn(
-              'flex items-start gap-3 p-4 rounded-lg border transition-all duration-200 ease-in-out',
+              "flex items-start gap-3 rounded-lg border p-4 transition-all duration-200 ease-in-out",
               step.completed
-                ? 'bg-green-50 border-green-200'
-                : 'bg-white border-gray-200 hover:border-gray-300'
+                ? "border-green-200 bg-green-50"
+                : "border-gray-200 bg-white hover:border-gray-300"
             )}
           >
             <input
@@ -84,26 +86,24 @@ const SingleDayTaskDisplay: FC<SingleDayTaskDisplayProps> = ({
               onChange={() => handleCheckboxChange(index)}
               disabled={step.completed || loadingSteps.has(index)}
               className={cn(
-                'mt-0.5 h-5 w-5 rounded border-gray-300 text-green-600',
-                'focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
-                'transition-all duration-200 cursor-pointer',
-                'disabled:cursor-not-allowed disabled:opacity-60'
+                "mt-0.5 h-5 w-5 rounded border-gray-300 text-green-600",
+                "focus:ring-2 focus:ring-green-500 focus:ring-offset-2",
+                "cursor-pointer transition-all duration-200",
+                "disabled:cursor-not-allowed disabled:opacity-60"
               )}
               aria-label={`Step ${index + 1}: ${step.text}`}
             />
             <label
               className={cn(
-                'flex-1 text-sm md:text-base cursor-pointer select-none transition-all duration-200',
-                step.completed
-                  ? 'line-through text-gray-500'
-                  : 'text-gray-900'
+                "flex-1 cursor-pointer text-sm transition-all duration-200 select-none md:text-base",
+                step.completed ? "text-gray-500 line-through" : "text-gray-900"
               )}
               onClick={() => !step.completed && handleCheckboxChange(index)}
             >
               {step.text}
             </label>
             {loadingSteps.has(index) && (
-              <div className="animate-spin h-5 w-5 border-2 border-green-500 border-t-transparent rounded-full" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-green-500 border-t-transparent" />
             )}
           </div>
         ))}
@@ -111,8 +111,8 @@ const SingleDayTaskDisplay: FC<SingleDayTaskDisplayProps> = ({
 
       {/* Celebration Message */}
       {completedCount === steps.length && steps.length > 0 && (
-        <div className="p-4 bg-green-100 border border-green-300 rounded-lg text-center animate-pulse">
-          <p className="text-green-800 font-semibold">
+        <div className="animate-pulse rounded-lg border border-green-300 bg-green-100 p-4 text-center">
+          <p className="font-semibold text-green-800">
             🎉 Congratulations! You&apos;ve completed all steps!
           </p>
         </div>

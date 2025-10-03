@@ -1,10 +1,10 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { config as appConfig } from '@/lib/config';
-import type { Database } from '@/types/database';
-import TaskDetailWrapper from './TaskDetailWrapper';
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { config as appConfig } from "@/lib/config";
+import type { Database } from "@/types/database";
+import TaskDetailWrapper from "./TaskDetailWrapper";
 
 interface TaskDetailPageProps {
   params: {
@@ -44,24 +44,27 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
 
   // Fetch task data with ownership validation
   const { data: task, error } = await supabase
-    .from('tasks')
-    .select('*')
-    .eq('id', params.id)
-    .eq('user_id', session.user.id)
+    .from("tasks")
+    .select("*")
+    .eq("id", params.id)
+    .eq("user_id", session.user.id)
     .single();
 
   // Handle errors
   if (error || !task) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Task Not Found</h1>
-          <p className="text-gray-600 mb-4">
-            The task you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-md rounded-lg bg-white p-6 text-center shadow-md">
+          <h1 className="mb-2 text-2xl font-bold text-gray-900">
+            Task Not Found
+          </h1>
+          <p className="mb-4 text-gray-600">
+            The task you&apos;re looking for doesn&apos;t exist or you
+            don&apos;t have permission to view it.
           </p>
           <Link
             href="/tasks/create"
-            className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-block rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
           >
             Go to Tasks
           </Link>
