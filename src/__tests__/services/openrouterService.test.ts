@@ -27,6 +27,7 @@ vi.mock("@/lib/langfuse", () => ({
 describe("openrouterService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   describe("generateFallbackBreakdown", () => {
@@ -112,7 +113,8 @@ describe("openrouterService", () => {
 
       const breakdown = await generateSingleDayBreakdown(
         "Test task",
-        "user-123"
+        "user-123",
+        0
       );
 
       // Should return fallback breakdown
@@ -122,11 +124,14 @@ describe("openrouterService", () => {
     });
 
     it("should handle API error with fallback", async () => {
-      global.fetch = vi.fn().mockRejectedValueOnce(new Error("API Error"));
+      global.fetch = vi
+        .fn()
+        .mockImplementation(() => Promise.reject(new Error("API Error")));
 
       const breakdown = await generateSingleDayBreakdown(
         "Test task",
-        "user-123"
+        "user-123",
+        0
       );
 
       // Should return fallback breakdown
@@ -146,14 +151,15 @@ describe("openrouterService", () => {
         ],
       };
 
-      global.fetch = vi.fn().mockResolvedValueOnce({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
 
       const breakdown = await generateSingleDayBreakdown(
         "Test task",
-        "user-123"
+        "user-123",
+        0
       );
 
       // Should return fallback breakdown
@@ -173,14 +179,15 @@ describe("openrouterService", () => {
         ],
       };
 
-      global.fetch = vi.fn().mockResolvedValueOnce({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
 
       const breakdown = await generateSingleDayBreakdown(
         "Test task",
-        "user-123"
+        "user-123",
+        0
       );
 
       // Should return fallback breakdown due to empty steps array
@@ -189,6 +196,7 @@ describe("openrouterService", () => {
     });
 
     it("should retry on transient failures", async () => {
+      vi.useFakeTimers();
       let callCount = 0;
 
       global.fetch = vi.fn().mockImplementation(() => {
@@ -218,13 +226,17 @@ describe("openrouterService", () => {
         });
       });
 
-      const breakdown = await generateSingleDayBreakdown(
+      const breakdownPromise = generateSingleDayBreakdown(
         "Test task",
         "user-123"
       );
 
+      await vi.runAllTimersAsync();
+      const breakdown = await breakdownPromise;
+
       expect(callCount).toBe(2); // First call fails, second succeeds
       expect(breakdown).toHaveLength(3);
+      vi.useRealTimers();
     });
   });
 
@@ -298,7 +310,7 @@ describe("openrouterService", () => {
         created: Date.now(),
       };
 
-      global.fetch = vi.fn().mockResolvedValueOnce({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -378,7 +390,8 @@ describe("openrouterService", () => {
       const breakdown = await generateMultiDayBreakdown(
         "Test habit",
         7,
-        "user-123"
+        "user-123",
+        0
       );
 
       // Should return fallback breakdown
@@ -388,12 +401,15 @@ describe("openrouterService", () => {
     });
 
     it("should handle API error with fallback", async () => {
-      global.fetch = vi.fn().mockRejectedValueOnce(new Error("API Error"));
+      global.fetch = vi
+        .fn()
+        .mockImplementation(() => Promise.reject(new Error("API Error")));
 
       const breakdown = await generateMultiDayBreakdown(
         "Test habit",
         7,
-        "user-123"
+        "user-123",
+        0
       );
 
       // Should return fallback breakdown
@@ -413,7 +429,7 @@ describe("openrouterService", () => {
         ],
       };
 
-      global.fetch = vi.fn().mockResolvedValueOnce({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -421,7 +437,8 @@ describe("openrouterService", () => {
       const breakdown = await generateMultiDayBreakdown(
         "Test habit",
         7,
-        "user-123"
+        "user-123",
+        0
       );
 
       // Should return fallback breakdown
@@ -441,7 +458,7 @@ describe("openrouterService", () => {
         ],
       };
 
-      global.fetch = vi.fn().mockResolvedValueOnce({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -449,7 +466,8 @@ describe("openrouterService", () => {
       const breakdown = await generateMultiDayBreakdown(
         "Test habit",
         7,
-        "user-123"
+        "user-123",
+        0
       );
 
       // Should return fallback due to validation error
@@ -459,6 +477,7 @@ describe("openrouterService", () => {
     });
 
     it("should retry on transient failures", async () => {
+      vi.useFakeTimers();
       let callCount = 0;
 
       global.fetch = vi.fn().mockImplementation(() => {
@@ -490,14 +509,18 @@ describe("openrouterService", () => {
         });
       });
 
-      const breakdown = await generateMultiDayBreakdown(
+      const breakdownPromise = generateMultiDayBreakdown(
         "Test habit",
         3,
         "user-123"
       );
 
+      await vi.runAllTimersAsync();
+      const breakdown = await breakdownPromise;
+
       expect(callCount).toBe(2); // First call fails, second succeeds
       expect(Object.keys(breakdown)).toHaveLength(3);
+      vi.useRealTimers();
     });
   });
 });
